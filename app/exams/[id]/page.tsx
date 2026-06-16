@@ -13,6 +13,7 @@ type ParticipantRow = {
   id: string
   member_id: string
   target_graduation_id: string | null
+  passed: boolean | null
   members: ParticipantMember | ParticipantMember[] | null
   graduations: ParticipantGraduation | ParticipantGraduation[] | null
 }
@@ -43,7 +44,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
       .order('rank_order'),
     supabase
       .from('exam_participants')
-      .select('id, member_id, target_graduation_id, members(first_name, last_name), graduations(name)')
+      .select('id, member_id, target_graduation_id, passed, members(first_name, last_name), graduations(name)')
       .eq('exam_id', id),
     supabase
       .from('members')
@@ -72,6 +73,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
       target_graduation_id: participant.target_graduation_id,
       member_name: member ? `${member.first_name} ${member.last_name}` : 'Unbekannt',
       target_graduation_name: graduation?.name || null,
+      passed: participant.passed,
     }
   })
 
@@ -141,7 +143,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
 
         <ExamParticipantsManager
           examId={e.id}
+          examDate={e.date}
           canEdit={canEdit}
+          role={role}
           members={(members || []) as Pick<Member, 'id' | 'first_name' | 'last_name' | 'graduation_id'>[]}
           graduations={visibleGraduations}
           initialParticipants={participantViews}

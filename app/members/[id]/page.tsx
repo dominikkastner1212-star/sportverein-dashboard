@@ -4,9 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowLeft, User, Phone, Mail, Calendar, Clock,
-  Award, FileText, Edit,
+  Award, Edit, Users as UsersIcon,
 } from 'lucide-react'
-import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, cn } from '@/lib/utils'
+import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, cn } from '@/lib/utils'
 import { DocumentSection } from '@/components/documents/DocumentSection'
 import { ChecklistSection } from '@/components/checklists/ChecklistSection'
 import type { Member, Graduation, ExamHistory, UserRole } from '@/types'
@@ -43,6 +43,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
   const m = member as Member & { graduations: Graduation | null }
   const grad = m.graduations
   const age = calculateAge(m.birth_date)
+  const latestExamDate = m.last_exam_date || history?.[0]?.date || null
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -123,6 +124,8 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
               <InfoRow icon={User} label="Geschlecht" value={GENDER_LABELS[m.gender]} />
               <InfoRow icon={Calendar} label="Geburtsdatum" value={`${formatDate(m.birth_date)} (${age} Jahre)`} />
               <InfoRow icon={Clock} label="Mitglied seit" value={formatDate(m.entry_date)} />
+              <InfoRow icon={UsersIcon} label="Gruppe" value={MEMBER_GROUP_LABELS[m.group_type || 'youth_adults']} />
+              {latestExamDate && <InfoRow icon={Calendar} label="Letzte Pruefung" value={formatDate(latestExamDate)} />}
               {grad && <InfoRow icon={Award} label="Aktueller Gürtel" value={grad.name} />}
               {m.phone && <InfoRow icon={Phone} label="Telefon" value={m.phone} />}
               {m.email && <InfoRow icon={Mail} label="E-Mail" value={m.email} />}

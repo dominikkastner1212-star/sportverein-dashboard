@@ -18,23 +18,47 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     graduation_id: null,
+    group_type: null,
     gender: null,
     status: null,
     age_min: null,
     age_max: null,
+    sort_by: 'name',
+    sort_direction: 'asc',
   })
 
   const filtered = useMemo(() => {
-    return members.filter(m => {
+    const result = members.filter(m => {
       const fullName = `${m.first_name} ${m.last_name}`.toLowerCase()
       if (filters.search && !fullName.includes(filters.search.toLowerCase())) return false
       if (filters.graduation_id && m.graduation_id !== filters.graduation_id) return false
+      if (filters.group_type && (m.group_type || 'youth_adults') !== filters.group_type) return false
       if (filters.gender && m.gender !== filters.gender) return false
       if (filters.status && m.status !== filters.status) return false
       const age = calculateAge(m.birth_date)
       if (filters.age_min !== null && age < filters.age_min) return false
       if (filters.age_max !== null && age > filters.age_max) return false
       return true
+    })
+
+    const direction = filters.sort_direction === 'asc' ? 1 : -1
+    return [...result].sort((a, b) => {
+      const nameA = `${a.last_name} ${a.first_name}`.toLowerCase()
+      const nameB = `${b.last_name} ${b.first_name}`.toLowerCase()
+
+      let value = 0
+      if (filters.sort_by === 'name') value = nameA.localeCompare(nameB)
+      if (filters.sort_by === 'graduation') {
+        value = (a.graduation?.rank_order ?? 9999) - (b.graduation?.rank_order ?? 9999)
+      }
+      if (filters.sort_by === 'group') value = (a.group_type || 'youth_adults').localeCompare(b.group_type || 'youth_adults')
+      if (filters.sort_by === 'status') value = a.status.localeCompare(b.status)
+      if (filters.sort_by === 'age') value = calculateAge(a.birth_date) - calculateAge(b.birth_date)
+      if (filters.sort_by === 'last_exam_date') {
+        value = new Date(a.last_exam_date || '1900-01-01').getTime() - new Date(b.last_exam_date || '1900-01-01').getTime()
+      }
+
+      return value === 0 ? nameA.localeCompare(nameB) : value * direction
     })
   }, [members, filters])
 
@@ -62,7 +86,7 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
       />
 
       {/* Results count */}
-      {filters.search || filters.graduation_id || filters.gender || filters.status ? (
+      {filters.search || filters.graduation_id || filters.group_type || filters.gender || filters.status || filters.age_min !== null || filters.age_max !== null ? (
         <p className="text-sm text-ink-muted">
           {filtered.length} von {members.length} Mitgliedern gefunden
         </p>

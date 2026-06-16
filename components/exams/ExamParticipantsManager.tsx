@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Loader2, Plus, Trash2, Users } from 'lucide-react'
+import { CheckCircle2, Loader2, Plus, RotateCcw, Trash2, Users, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import type { Graduation, Member } from '@/types'
+import { ChecklistSection } from '@/components/checklists/ChecklistSection'
+import { cn } from '@/lib/utils'
+import type { Graduation, Member, UserRole } from '@/types'
 
 interface ExamParticipantView {
   id: string
@@ -12,11 +14,14 @@ interface ExamParticipantView {
   target_graduation_id: string | null
   member_name: string
   target_graduation_name: string | null
+  passed: boolean | null
 }
 
 interface ExamParticipantsManagerProps {
   examId: string
+  examDate: string
   canEdit: boolean
+  role: UserRole
   members: Pick<Member, 'id' | 'first_name' | 'last_name' | 'graduation_id'>[]
   graduations: Graduation[]
   initialParticipants: ExamParticipantView[]
@@ -24,7 +29,9 @@ interface ExamParticipantsManagerProps {
 
 export function ExamParticipantsManager({
   examId,
+  examDate,
   canEdit,
+  role,
   members,
   graduations,
   initialParticipants,
@@ -35,6 +42,7 @@ export function ExamParticipantsManager({
   const [memberId, setMemberId] = useState('')
   const [targetGraduationId, setTargetGraduationId] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const participantMemberIds = useMemo(
@@ -77,6 +85,7 @@ export function ExamParticipantsManager({
         target_graduation_id: data.target_graduation_id,
         member_name: member ? `${member.first_name} ${member.last_name}` : 'Unbekannt',
         target_graduation_name: targetGraduation?.name || null,
+        passed: null,
       },
     ])
     setMemberId('')
@@ -98,6 +107,84 @@ export function ExamParticipantsManager({
     }
 
     setParticipants(prev => prev.filter(participant => participant.id !== id))
+    router.refresh()
+  }
+
+  async function setParticipantResult(participant: ExamParticipantView, passed: boolean | null) {
+    setError(null)
+    setUpdatingId(participant.id)
+
+    if (passed !== null && !participant.target_graduation_id) {
+      setError('Bitte zuerst einen Zielguertel fuer den Teilnehmer hinterlegen.')
+      setUpdatingId(null)
+      return
+    }
+
+    const { error: participantError } = await supabase
+      .from('exam_participants')
+      .update({ passed })
+      .eq('id', participant.id)
+
+    if (participantError) {
+      setError(participantError.message)
+      setUpdatingId(null)
+      return
+    }
+
+    if (passed !== null && participant.target_graduation_id) {
+      const { data: existingHistory } = await supabase
+        .from('exam_history')
+        .select('id')
+        .eq('member_id', participant.member_id)
+        .eq('exam_id', examId)
+        .eq('graduation_id', participant.target_graduation_id)
+        .maybeSingle()
+
+      const historyPayload = {
+        member_id: participant.member_id,
+        exam_id: examId,
+        graduation_id: participant.target_graduation_id,
+        passed,
+        date: examDate,
+        notes: null,
+        examiner: null,
+      }
+
+      const historyQuery = existingHistory
+        ? supabase.from('exam_history').update(historyPayload).eq('id', existingHistory.id)
+        : supabase.from('exam_history').insert(historyPayload)
+
+      const { error: historyError } = await historyQuery
+      if (historyError) {
+        setError(historyError.message)
+        setUpdatingId(null)
+        return
+      }
+
+      const memberPayload: { last_exam_date: string; graduation_id?: string } = {
+        last_exam_date: examDate,
+      }
+
+      if (passed) {
+        memberPayload.graduation_id = participant.target_graduation_id
+      }
+
+      const { error: memberError } = await supabase
+        .from('members')
+        .update(memberPayload)
+        .eq('id', participant.member_id)
+
+      if (memberError) {
+        setError(memberError.message)
+        setUpdatingId(null)
+        return
+      }
+    }
+
+    setParticipants(prev => prev.map(item => (
+      item.id === participant.id ? { ...item, passed } : item
+    )))
+    setUpdatingId(null)
     router.refresh()
   }
 
@@ -162,23 +249,70 @@ export function ExamParticipantsManager({
       ) : (
         <div className="space-y-2">
           {participants.map(participant => (
-            <div key={participant.id} className="flex items-center justify-between gap-3 rounded-lg bg-surface-1 px-3 py-2">
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-ink truncate">{participant.member_name}</p>
-                <p className="text-xs text-ink-subtle">
-                  {participant.target_graduation_name || 'Kein Zielguertel'}
-                </p>
+            <div key={participant.id} className="rounded-lg bg-surface-1 px-3 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink truncate">{participant.member_name}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                    <p className="text-xs text-ink-subtle">
+                      Zielrang: {participant.target_graduation_name || 'Kein Zielguertel'}
+                    </p>
+                    <span className={cn(
+                      'badge text-[10px]',
+                      participant.passed === true && 'bg-green-50 text-green-700 border-green-200',
+                      participant.passed === false && 'bg-red-50 text-red-700 border-red-200',
+                      participant.passed === null && 'bg-surface-2 text-ink-muted border-surface-3'
+                    )}>
+                      {participant.passed === true ? 'Bestanden' : participant.passed === false ? 'Nicht bestanden' : 'Offen'}
+                    </span>
+                  </div>
+                </div>
+
+                {canEdit && (
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      type="button"
+                      className="btn-ghost btn-sm p-1.5 text-green-700"
+                      onClick={() => setParticipantResult(participant, true)}
+                      disabled={updatingId === participant.id}
+                      title="Bestanden"
+                    >
+                      {updatingId === participant.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost btn-sm p-1.5 text-red-600"
+                      onClick={() => setParticipantResult(participant, false)}
+                      disabled={updatingId === participant.id}
+                      title="Nicht bestanden"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-ghost btn-sm p-1.5"
+                      onClick={() => setParticipantResult(participant, null)}
+                      disabled={updatingId === participant.id}
+                      title="Offen setzen"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      className="text-ink-subtle hover:text-red-600 p-1.5"
+                      onClick={() => removeParticipant(participant.id)}
+                      aria-label="Teilnehmer entfernen"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
-              {canEdit && (
-                <button
-                  type="button"
-                  className="text-ink-subtle hover:text-red-600"
-                  onClick={() => removeParticipant(participant.id)}
-                  aria-label="Teilnehmer entfernen"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
+
+              <div className="mt-3 border-t border-surface-3 pt-3">
+                <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-2">Aufgaben</p>
+                <ChecklistSection memberId={participant.member_id} examId={examId} role={role} />
+              </div>
             </div>
           ))}
         </div>

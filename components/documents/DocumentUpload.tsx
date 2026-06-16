@@ -54,9 +54,6 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     },
     maxSize: MAX_FILE_SIZE_BYTES,
     multiple: true,
@@ -72,7 +69,12 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
     setGlobalError(null)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
+    if (!user) {
+      setGlobalError('Bitte erneut anmelden, um Dokumente hochzuladen.')
+      setSubmitting(false)
+      return
+    }
+    let hadError = false
 
     for (let i = 0; i < uploadFiles.length; i++) {
       const item = uploadFiles[i]
@@ -113,6 +115,7 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
           idx === i ? { ...f, state: 'success', progress: 100 } : f
         ))
       } catch (err: unknown) {
+        hadError = true
         const message = err instanceof Error ? err.message : 'Upload fehlgeschlagen'
         setUploadFiles(prev => prev.map((f, idx) =>
           idx === i ? { ...f, state: 'error', error: message } : f
@@ -122,8 +125,7 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
 
     setSubmitting(false)
 
-    const allSuccess = uploadFiles.every(f => f.state === 'success')
-    if (allSuccess) {
+    if (!hadError) {
       setTimeout(onSuccess, 800)
     }
   }
@@ -152,7 +154,7 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
           oder <span className="text-accent">Datei auswählen</span>
         </p>
         <p className="text-[11px] text-ink-faint mt-2">
-          PDF, JPG, PNG, DOCX · max. {MAX_FILE_SIZE_MB} MB
+          Nur PDF · max. {MAX_FILE_SIZE_MB} MB
         </p>
       </div>
 

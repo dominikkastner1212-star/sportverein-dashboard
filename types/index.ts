@@ -29,6 +29,9 @@ export interface Graduation {
 
 export type MemberStatus = 'active' | 'paused' | 'left'
 export type MemberGender = 'male' | 'female' | 'other'
+export type MemberGroup = 'children' | 'youth_adults'
+export type MemberSortKey = 'name' | 'graduation' | 'group' | 'status' | 'age' | 'last_exam_date'
+export type SortDirection = 'asc' | 'desc'
 
 export interface Member {
   id: string
@@ -38,8 +41,10 @@ export interface Member {
   birth_date: string
   entry_date: string
   status: MemberStatus
+  group_type: MemberGroup
   graduation_id: string | null
   graduation?: Graduation
+  last_exam_date: string | null
   avatar_url: string | null
   notes: string | null
   phone: string | null
@@ -172,10 +177,13 @@ export interface MemberDocument {
 export interface FilterState {
   search: string
   graduation_id: string | null
+  group_type: MemberGroup | null
   gender: MemberGender | null
   status: MemberStatus | null
   age_min: number | null
   age_max: number | null
+  sort_by: MemberSortKey
+  sort_direction: SortDirection
 }
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
@@ -201,10 +209,8 @@ export const DOCUMENT_TYPE_ICONS: Record<DocumentType, string> = {
 export const BELT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   white: { bg: '#f9fafb', text: '#374151', border: '#d1d5db' },
   yellow: { bg: '#fefce8', text: '#854d0e', border: '#eab308' },
-  orange: { bg: '#fff7ed', text: '#9a3412', border: '#f97316' },
   green: { bg: '#f0fdf4', text: '#166534', border: '#16a34a' },
   blue: { bg: '#eff6ff', text: '#1e40af', border: '#2563eb' },
-  brown: { bg: '#fefce8', text: '#92400e', border: '#92400e' },
   black: { bg: '#111827', text: '#f9fafb', border: '#111827' },
   red: { bg: '#fef2f2', text: '#991b1b', border: '#dc2626' },
 }

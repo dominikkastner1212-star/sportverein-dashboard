@@ -24,7 +24,9 @@ export type Database = {
           birth_date: string
           entry_date: string
           status: 'active' | 'paused' | 'left'
+          group_type: 'children' | 'youth_adults'
           graduation_id: string | null
+          last_exam_date: string | null
           avatar_url: string | null
           notes: string | null
           phone: string | null

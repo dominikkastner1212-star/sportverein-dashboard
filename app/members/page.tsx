@@ -25,10 +25,15 @@ export default async function MembersPage() {
   ])
 
   const canEdit = profile?.role === 'admin' || profile?.role === 'trainer'
+  const normalizedMembers = ((members || []) as (Member & { graduations?: Graduation | Graduation[] | null })[])
+    .map(member => ({
+      ...member,
+      graduation: Array.isArray(member.graduations) ? member.graduations[0] : member.graduations || undefined,
+    }))
 
   return (
     <MembersClient
-      members={(members || []) as (Member & { graduation?: Graduation })[]}
+      members={normalizedMembers}
       graduations={getVisibleGraduations((graduations || []) as Graduation[])}
       canEdit={canEdit}
     />

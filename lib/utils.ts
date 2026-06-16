@@ -44,9 +44,6 @@ export function formatFileSize(bytes: number): string {
 
 export const ALLOWED_FILE_TYPES = {
   'application/pdf': ['.pdf'],
-  'image/jpeg': ['.jpg', '.jpeg'],
-  'image/png': ['.png'],
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
 }
 
 export const MAX_FILE_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || 10)
@@ -79,10 +76,8 @@ export function getGraduationColorName(color: string): string {
   const map: Record<string, string> = {
     '#e5e7eb': 'Weiß',
     '#eab308': 'Gelb',
-    '#f97316': 'Orange',
     '#16a34a': 'Grün',
     '#2563eb': 'Blau',
-    '#92400e': 'Braun',
     '#111110': 'Schwarz',
     '#dc2626': 'Rot',
   }
@@ -119,4 +114,9 @@ export const GENDER_LABELS = {
   male: 'Männlich',
   female: 'Weiblich',
   other: 'Divers',
+}
+
+export const MEMBER_GROUP_LABELS = {
+  children: 'Kinder',
+  youth_adults: 'Jugend/Erwachsene',
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS } from '@/lib/utils'
+import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS } from '@/lib/utils'
 import type { Member, Graduation, MemberStatus } from '@/types'
 import { User } from 'lucide-react'
 
@@ -67,6 +67,9 @@ export function MemberCard({ member }: MemberCardProps) {
               <p className="text-xs text-ink-muted mt-0.5">
                 {GENDER_LABELS[member.gender]} · {age} Jahre
               </p>
+              <p className="text-xs text-ink-subtle mt-0.5">
+                {MEMBER_GROUP_LABELS[member.group_type || 'youth_adults']}
+              </p>
               {grad && (
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <div
@@ -85,7 +88,7 @@ export function MemberCard({ member }: MemberCardProps) {
               {STATUS_LABELS[member.status as MemberStatus]}
             </span>
             <span className="text-[11px] text-ink-faint">
-              seit {formatDate(member.entry_date, 'yyyy')}
+              {member.last_exam_date ? `Pruefung ${formatDate(member.last_exam_date)}` : `seit ${formatDate(member.entry_date, 'yyyy')}`}
             </span>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
-import type { Graduation, Member, MemberGender, MemberStatus } from '@/types'
+import type { Graduation, Member, MemberGender, MemberGroup, MemberStatus } from '@/types'
 
 interface MemberFormProps {
   graduations: Graduation[]
@@ -30,7 +30,9 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
     birth_date: member?.birth_date || '',
     entry_date: member?.entry_date || today,
     status: member?.status || ('active' as MemberStatus),
+    group_type: member?.group_type || ('youth_adults' as MemberGroup),
     graduation_id: member?.graduation_id || '',
+    last_exam_date: member?.last_exam_date || '',
     phone: member?.phone || '',
     email: member?.email || '',
     emergency_contact: member?.emergency_contact || '',
@@ -61,7 +63,9 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
       birth_date: form.birth_date,
       entry_date: form.entry_date,
       status: form.status,
+      group_type: form.group_type,
       graduation_id: form.graduation_id || null,
+      last_exam_date: form.last_exam_date || null,
       avatar_url: null,
       notes: form.notes.trim() || null,
       phone: form.phone.trim() || null,
@@ -149,6 +153,18 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
           </div>
 
           <div>
+            <label className="input-label">Gruppe</label>
+            <select
+              className="input"
+              value={form.group_type}
+              onChange={event => updateField('group_type', event.target.value as MemberGroup)}
+            >
+              <option value="children">Kinder</option>
+              <option value="youth_adults">Jugend/Erwachsene</option>
+            </select>
+          </div>
+
+          <div>
             <label className="input-label">Geburtsdatum</label>
             <input
               type="date"
@@ -167,6 +183,16 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
               value={form.entry_date}
               onChange={event => updateField('entry_date', event.target.value)}
               required
+            />
+          </div>
+
+          <div>
+            <label className="input-label">Letzte Pruefung am</label>
+            <input
+              type="date"
+              className="input"
+              value={form.last_exam_date}
+              onChange={event => updateField('last_exam_date', event.target.value)}
             />
           </div>
 

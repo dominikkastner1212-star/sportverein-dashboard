@@ -62,7 +62,9 @@ CREATE TABLE IF NOT EXISTS public.members (
   birth_date          DATE NOT NULL,
   entry_date          DATE NOT NULL DEFAULT CURRENT_DATE,
   status              TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'paused', 'left')),
+  group_type          TEXT NOT NULL DEFAULT 'youth_adults' CHECK (group_type IN ('children', 'youth_adults')),
   graduation_id       UUID REFERENCES public.graduations(id) ON DELETE SET NULL,
+  last_exam_date      DATE,
   avatar_url          TEXT,
   notes               TEXT,
   phone               TEXT,
@@ -201,8 +203,10 @@ CREATE TABLE IF NOT EXISTS public.member_documents (
 -- ─── INDEXES ─────────────────────────────────────────────────
 
 CREATE INDEX IF NOT EXISTS idx_members_status ON public.members(status);
+CREATE INDEX IF NOT EXISTS idx_members_group_type ON public.members(group_type);
 CREATE INDEX IF NOT EXISTS idx_members_graduation ON public.members(graduation_id);
 CREATE INDEX IF NOT EXISTS idx_members_birth_date ON public.members(birth_date);
+CREATE INDEX IF NOT EXISTS idx_members_last_exam_date ON public.members(last_exam_date);
 CREATE INDEX IF NOT EXISTS idx_exams_date ON public.exams(date);
 CREATE INDEX IF NOT EXISTS idx_exams_status ON public.exams(status);
 CREATE INDEX IF NOT EXISTS idx_exam_participants_exam ON public.exam_participants(exam_id);

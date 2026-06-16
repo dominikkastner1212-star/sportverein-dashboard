@@ -15,7 +15,20 @@ export function MemberFilterBar({ graduations, filters, onChange }: MemberFilter
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   const hasActiveFilters =
-    filters.graduation_id || filters.gender || filters.status || filters.search
+    filters.graduation_id || filters.group_type || filters.gender || filters.status || filters.search ||
+    filters.age_min !== null || filters.age_max !== null
+
+  const resetFilters: FilterState = {
+    search: '',
+    graduation_id: null,
+    group_type: null,
+    gender: null,
+    status: null,
+    age_min: null,
+    age_max: null,
+    sort_by: 'name',
+    sort_direction: 'asc',
+  }
 
   return (
     <div className="card p-4 space-y-3">
@@ -46,7 +59,7 @@ export function MemberFilterBar({ graduations, filters, onChange }: MemberFilter
 
         {hasActiveFilters && (
           <button
-            onClick={() => onChange({ search: '', graduation_id: null, gender: null, status: null, age_min: null, age_max: null })}
+            onClick={() => onChange(resetFilters)}
             className="btn-ghost btn-sm flex-shrink-0"
           >
             <X className="w-3.5 h-3.5" />
@@ -69,6 +82,20 @@ export function MemberFilterBar({ graduations, filters, onChange }: MemberFilter
               {graduations.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
               ))}
+            </select>
+          </div>
+
+          {/* Group */}
+          <div>
+            <label className="input-label">Gruppe</label>
+            <select
+              className="input"
+              value={filters.group_type || ''}
+              onChange={e => onChange({ ...filters, group_type: (e.target.value || null) as FilterState['group_type'] })}
+            >
+              <option value="">Alle</option>
+              <option value="children">Kinder</option>
+              <option value="youth_adults">Jugend/Erwachsene</option>
             </select>
           </div>
 
@@ -125,6 +152,36 @@ export function MemberFilterBar({ graduations, filters, onChange }: MemberFilter
                 onChange={e => onChange({ ...filters, age_max: e.target.value ? Number(e.target.value) : null })}
               />
             </div>
+          </div>
+
+          {/* Sort */}
+          <div>
+            <label className="input-label">Sortieren nach</label>
+            <select
+              className="input"
+              value={filters.sort_by}
+              onChange={e => onChange({ ...filters, sort_by: e.target.value as FilterState['sort_by'] })}
+            >
+              <option value="name">Name</option>
+              <option value="graduation">Gurtel/Rang</option>
+              <option value="group">Gruppe</option>
+              <option value="status">Status</option>
+              <option value="age">Alter</option>
+              <option value="last_exam_date">Letzte Pruefung</option>
+            </select>
+          </div>
+
+          {/* Direction */}
+          <div>
+            <label className="input-label">Richtung</label>
+            <select
+              className="input"
+              value={filters.sort_direction}
+              onChange={e => onChange({ ...filters, sort_direction: e.target.value as FilterState['sort_direction'] })}
+            >
+              <option value="asc">Aufsteigend</option>
+              <option value="desc">Absteigend</option>
+            </select>
           </div>
         </div>
       )}

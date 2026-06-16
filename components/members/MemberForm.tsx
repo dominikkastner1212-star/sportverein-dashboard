@@ -6,34 +6,36 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
-import type { Graduation, MemberGender, MemberStatus } from '@/types'
+import type { Graduation, Member, MemberGender, MemberStatus } from '@/types'
 
 interface MemberFormProps {
   graduations: Graduation[]
+  member?: Member
 }
 
 type MemberInsert = Database['public']['Tables']['members']['Insert']
 
 const today = new Date().toISOString().split('T')[0]
 
-export function MemberForm({ graduations }: MemberFormProps) {
+export function MemberForm({ graduations, member }: MemberFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const isEditing = Boolean(member)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
-    first_name: '',
-    last_name: '',
-    gender: 'male' as MemberGender,
-    birth_date: '',
-    entry_date: today,
-    status: 'active' as MemberStatus,
-    graduation_id: '',
-    phone: '',
-    email: '',
-    emergency_contact: '',
-    emergency_phone: '',
-    notes: '',
+    first_name: member?.first_name || '',
+    last_name: member?.last_name || '',
+    gender: member?.gender || ('male' as MemberGender),
+    birth_date: member?.birth_date || '',
+    entry_date: member?.entry_date || today,
+    status: member?.status || ('active' as MemberStatus),
+    graduation_id: member?.graduation_id || '',
+    phone: member?.phone || '',
+    email: member?.email || '',
+    emergency_contact: member?.emergency_contact || '',
+    emergency_phone: member?.emergency_phone || '',
+    notes: member?.notes || '',
   })
 
   function updateField<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
@@ -61,14 +63,14 @@ export function MemberForm({ graduations }: MemberFormProps) {
       emergency_phone: form.emergency_phone.trim() || null,
     }
 
-    const { data, error: insertError } = await supabase
-      .from('members')
-      .insert(payload)
-      .select('id')
-      .single()
+    const query = isEditing && member
+      ? supabase.from('members').update(payload).eq('id', member.id).select('id').single()
+      : supabase.from('members').insert(payload).select('id').single()
 
-    if (insertError || !data) {
-      setError(insertError?.message || 'Mitglied konnte nicht erstellt werden.')
+    const { data, error: saveError } = await query
+
+    if (saveError || !data) {
+      setError(saveError?.message || 'Mitglied konnte nicht gespeichert werden.')
       setSubmitting(false)
       return
     }
@@ -85,7 +87,9 @@ export function MemberForm({ graduations }: MemberFormProps) {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Neues Mitglied</h1>
+        <h1 className="text-2xl font-semibold text-ink">
+          {isEditing ? 'Mitglied bearbeiten' : 'Neues Mitglied'}
+        </h1>
         <p className="text-sm text-ink-muted mt-1">Stammdaten und Kontaktinformationen erfassen</p>
       </div>
 

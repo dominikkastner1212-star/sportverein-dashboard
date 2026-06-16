@@ -5,6 +5,16 @@ import { UpcomingExams } from '@/components/dashboard/UpcomingExams'
 import { Users, Calendar, Award, TrendingUp } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
+type GraduationSummary = { name: string }
+
+function getGraduationName(value: GraduationSummary | GraduationSummary[] | null) {
+  if (Array.isArray(value)) {
+    return value[0]?.name
+  }
+
+  return value?.name
+}
+
 export default async function DashboardPage() {
   const supabase = createServerClient()
 
@@ -37,7 +47,7 @@ export default async function DashboardPage() {
   // Graduation distribution
   const gradDist: Record<string, number> = {}
   ;(members || []).forEach(m => {
-    const key = (m.graduations as { name: string } | null)?.name || 'Kein GÃ¼rtel'
+    const key = getGraduationName(m.graduations) || 'Kein Gürtel'
     gradDist[key] = (gradDist[key] || 0) + 1
   })
 

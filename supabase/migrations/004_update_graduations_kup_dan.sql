@@ -4,7 +4,13 @@
 -- ============================================================
 
 INSERT INTO public.graduations (name, color, border_color, rank_order, min_age, min_training_months)
-SELECT *
+SELECT
+  desired.name,
+  desired.color,
+  desired.border_color,
+  desired.rank_order::integer,
+  desired.min_age::integer,
+  desired.min_training_months::integer
 FROM (VALUES
   -- Kinder: Mini KUP 1-4
   ('Mini KUP 1', '#f9fafb', '#d1d5db', 1, null, null),

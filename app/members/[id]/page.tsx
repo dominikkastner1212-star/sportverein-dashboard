@@ -11,7 +11,8 @@ import { DocumentSection } from '@/components/documents/DocumentSection'
 import { ChecklistSection } from '@/components/checklists/ChecklistSection'
 import type { Member, Graduation, ExamHistory, UserRole } from '@/types'
 
-export default async function MemberDetailPage({ params }: { params: { id: string } }) {
+export default async function MemberDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = createServerClient()
 
   const { data: { session } } = await supabase.auth.getSession()
@@ -28,12 +29,12 @@ export default async function MemberDetailPage({ params }: { params: { id: strin
     supabase
       .from('members')
       .select('*, graduations(*)')
-      .eq('id', params.id)
+      .eq('id', id)
       .single(),
     supabase
       .from('exam_history')
       .select('*, graduations(name, border_color)')
-      .eq('member_id', params.id)
+      .eq('member_id', id)
       .order('date', { ascending: false }),
   ])
 

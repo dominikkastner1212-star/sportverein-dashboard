@@ -114,8 +114,23 @@ export interface ChecklistTemplate {
   description: string | null
   graduation_id: string | null
   graduation?: Graduation
+  usage_type: 'member' | 'exam'
+  is_active: boolean
   is_default: boolean
   created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ChecklistAssignment {
+  id: string
+  template_id: string
+  scope_type: 'all' | 'group' | 'graduation' | 'member'
+  group_type: MemberGroup | null
+  graduation_ids: string[]
+  member_ids: string[]
+  priority: number
+  is_active: boolean
   created_at: string
   updated_at: string
 }

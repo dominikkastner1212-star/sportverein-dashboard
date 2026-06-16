@@ -104,6 +104,8 @@ export type Database = {
           name: string
           description: string | null
           graduation_id: string | null
+          usage_type: 'member' | 'exam'
+          is_active: boolean
           is_default: boolean
           created_by: string | null
           created_at: string
@@ -111,6 +113,22 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['checklist_templates']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['checklist_templates']['Insert']>
+      }
+      checklist_assignments: {
+        Row: {
+          id: string
+          template_id: string
+          scope_type: 'all' | 'group' | 'graduation' | 'member'
+          group_type: 'children' | 'youth_adults' | null
+          graduation_ids: string[]
+          member_ids: string[]
+          priority: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['checklist_assignments']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['checklist_assignments']['Insert']>
       }
       checklist_items: {
         Row: {

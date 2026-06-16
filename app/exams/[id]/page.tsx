@@ -1,12 +1,20 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock, Edit, MapPin, Users } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, Edit, MapPin } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
+import { ExamParticipantsManager } from '@/components/exams/ExamParticipantsManager'
 import { formatDate, EXAM_STATUS_LABELS, EXAM_STATUS_COLORS, cn } from '@/lib/utils'
-import type { Exam, ExamStatus, Graduation, UserRole } from '@/types'
+import type { Exam, ExamStatus, Graduation, Member, UserRole } from '@/types'
 
 type ParticipantMember = { first_name: string; last_name: string }
 type ParticipantGraduation = { name: string }
+type ParticipantRow = {
+  id: string
+  member_id: string
+  target_graduation_id: string | null
+  members: ParticipantMember | ParticipantMember[] | null
+  graduations: ParticipantGraduation | ParticipantGraduation[] | null
+}
 
 function firstRelation<T>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] || null : value
@@ -17,7 +25,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
   const supabase = createServerClient()
 
   const { data: { session } } = await supabase.auth.getSession()
-  const [{ data: profile }, { data: exam }, { data: graduations }, { data: participants }] = await Promise.all([
+  const [{ data: profile }, { data: exam }, { data: graduations }, { data: participants }, { data: members }] = await Promise.all([
     supabase
       .from('profiles')
       .select('role')
@@ -34,8 +42,12 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
       .order('rank_order'),
     supabase
       .from('exam_participants')
-      .select('id, members(first_name, last_name), graduations(name)')
+      .select('id, member_id, target_graduation_id, members(first_name, last_name), graduations(name)')
       .eq('exam_id', id),
+    supabase
+      .from('members')
+      .select('id, first_name, last_name, graduation_id')
+      .order('first_name'),
   ])
 
   if (!exam) {
@@ -48,6 +60,18 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
   const allowedIds = new Set(e.allowed_graduation_ids || [])
   const allowedGraduations = (graduations || []).filter(g => allowedIds.has(g.id)) as Graduation[]
   const status = e.status as ExamStatus
+  const participantViews = ((participants || []) as ParticipantRow[]).map(participant => {
+    const member = firstRelation(participant.members)
+    const graduation = firstRelation(participant.graduations)
+
+    return {
+      id: participant.id,
+      member_id: participant.member_id,
+      target_graduation_id: participant.target_graduation_id,
+      member_name: member ? `${member.first_name} ${member.last_name}` : 'Unbekannt',
+      target_graduation_name: graduation?.name || null,
+    }
+  })
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -113,26 +137,13 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
           )}
         </div>
 
-        <div className="card p-5">
-          <h2 className="section-title mb-4">Teilnehmer</h2>
-          {!participants || participants.length === 0 ? (
-            <p className="text-sm text-ink-muted">Noch keine Teilnehmer hinterlegt.</p>
-          ) : (
-            <div className="space-y-2">
-              {participants.map(participant => {
-                const member = firstRelation(participant.members as ParticipantMember | ParticipantMember[] | null)
-                const graduation = firstRelation(participant.graduations as ParticipantGraduation | ParticipantGraduation[] | null)
-                return (
-                  <div key={participant.id} className="flex items-center gap-2 text-sm text-ink-muted">
-                    <Users className="w-4 h-4 text-ink-faint" />
-                    <span>{member ? `${member.first_name} ${member.last_name}` : 'Unbekannt'}</span>
-                    {graduation && <span className="text-ink-subtle">({graduation.name})</span>}
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
+        <ExamParticipantsManager
+          examId={e.id}
+          canEdit={canEdit}
+          members={(members || []) as Pick<Member, 'id' | 'first_name' | 'last_name' | 'graduation_id'>[]}
+          graduations={(graduations || []) as Graduation[]}
+          initialParticipants={participantViews}
+        />
       </div>
     </div>
   )

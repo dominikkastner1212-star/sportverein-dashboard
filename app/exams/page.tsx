@@ -83,44 +83,50 @@ export default async function ExamsPage() {
 }
 
 function ExamRow({ exam }: { exam: Record<string, unknown> }) {
+  const id = exam.id as string
+  const title = exam.title as string
+  const date = exam.date as string
+  const status = exam.status as ExamStatus
+  const time = typeof exam.time === 'string' ? exam.time : null
+  const location = typeof exam.location === 'string' ? exam.location : null
   const examiner = exam.profiles as { full_name: string } | null
   const participants = (exam.exam_participants as { id: string }[] | null) || []
 
   return (
-    <Link href={`/exams/${exam.id as string}`}>
+    <Link href={`/exams/${id}`}>
       <div className="card p-4 hover:shadow-card-hover transition-all duration-200 group cursor-pointer">
         <div className="flex items-start gap-4">
           {/* Date block */}
           <div className="flex-shrink-0 w-12 text-center p-2 bg-surface-1 rounded-xl">
             <p className="text-lg font-bold text-ink tabular-nums leading-none">
-              {formatDate(exam.date as string, 'dd')}
+              {formatDate(date, 'dd')}
             </p>
             <p className="text-[10px] text-ink-subtle uppercase tracking-wide mt-0.5">
-              {formatDate(exam.date as string, 'MMM')}
+              {formatDate(date, 'MMM')}
             </p>
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4">
               <p className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
-                {exam.title as string}
+                {title}
               </p>
-              <span className={cn('badge text-[10px] flex-shrink-0', EXAM_STATUS_COLORS[exam.status as ExamStatus])}>
-                {EXAM_STATUS_LABELS[exam.status as ExamStatus]}
+              <span className={cn('badge text-[10px] flex-shrink-0', EXAM_STATUS_COLORS[status])}>
+                {EXAM_STATUS_LABELS[status]}
               </span>
             </div>
 
             <div className="flex items-center gap-4 mt-1.5 flex-wrap">
-              {exam.time && (
+              {time && (
                 <span className="flex items-center gap-1 text-xs text-ink-subtle">
                   <Clock className="w-3 h-3" />
-                  {(exam.time as string).slice(0, 5)} Uhr
+                  {time.slice(0, 5)} Uhr
                 </span>
               )}
-              {exam.location && (
+              {location && (
                 <span className="flex items-center gap-1 text-xs text-ink-subtle">
                   <MapPin className="w-3 h-3" />
-                  {exam.location as string}
+                  {location}
                 </span>
               )}
               {examiner && (

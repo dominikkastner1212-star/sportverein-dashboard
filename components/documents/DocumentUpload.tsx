@@ -7,7 +7,6 @@ import { cn, formatFileSize, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/lib
 import { DOCUMENT_TYPE_LABELS } from '@/types'
 import type { DocumentType } from '@/types'
 import { createClient, uploadDocument } from '@/lib/supabase/client'
-import { v4 as uuidv4 } from 'uuid'
 
 interface DocumentUploadProps {
   memberId: string
@@ -83,7 +82,7 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
       ))
 
       try {
-        const docId = uuidv4()
+        const docId = crypto.randomUUID()
         const ext = item.file.name.split('.').pop() || ''
 
         // Upload to Supabase Storage

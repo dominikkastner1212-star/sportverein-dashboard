@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/client'
+import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Shield, User } from 'lucide-react'
 

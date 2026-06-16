@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase/client'
+import { createServerClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Plus, Calendar, MapPin, Clock, Users } from 'lucide-react'
 import { formatDate, EXAM_STATUS_LABELS, EXAM_STATUS_COLORS, cn } from '@/lib/utils'

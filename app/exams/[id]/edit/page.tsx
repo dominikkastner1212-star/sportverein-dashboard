@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { ExamForm } from '@/components/exams/ExamForm'
+import { getVisibleGraduations } from '@/lib/graduations'
 import type { Exam, Graduation } from '@/types'
 
 export default async function EditExamPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,7 +42,7 @@ export default async function EditExamPage({ params }: { params: Promise<{ id: s
   return (
     <ExamForm
       exam={exam as Exam}
-      graduations={(graduations || []) as Graduation[]}
+      graduations={getVisibleGraduations((graduations || []) as Graduation[])}
       examinerId={exam.examiner_id || session.user.id}
     />
   )

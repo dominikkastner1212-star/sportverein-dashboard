@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { MemberForm } from '@/components/members/MemberForm'
+import { getVisibleGraduations } from '@/lib/graduations'
 import type { Graduation } from '@/types'
 
 export default async function NewMemberPage() {
@@ -28,5 +29,5 @@ export default async function NewMemberPage() {
     redirect('/members')
   }
 
-  return <MemberForm graduations={(graduations || []) as Graduation[]} />
+  return <MemberForm graduations={getVisibleGraduations((graduations || []) as Graduation[])} />
 }

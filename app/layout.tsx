@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'Vereinsverwaltung',
-  description: 'Dashboard für Vereinsmitglieder und Prüfungsverwaltung',
+  title: 'Taekwon-Do Kaufungen Dashboard',
+  description: 'Dashboard fuer Mitglieder und Pruefungsverwaltung',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

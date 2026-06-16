@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowLeft, Calendar, Clock, Edit, MapPin } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { ExamParticipantsManager } from '@/components/exams/ExamParticipantsManager'
+import { getVisibleGraduations } from '@/lib/graduations'
 import { formatDate, EXAM_STATUS_LABELS, EXAM_STATUS_COLORS, cn } from '@/lib/utils'
 import type { Exam, ExamStatus, Graduation, Member, UserRole } from '@/types'
 
@@ -57,8 +58,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
   const role = (profile?.role || 'reader') as UserRole
   const canEdit = role === 'admin' || role === 'trainer'
   const e = exam as Exam & { profiles: { full_name: string } | null }
+  const visibleGraduations = getVisibleGraduations((graduations || []) as Graduation[])
   const allowedIds = new Set(e.allowed_graduation_ids || [])
-  const allowedGraduations = (graduations || []).filter(g => allowedIds.has(g.id)) as Graduation[]
+  const allowedGraduations = visibleGraduations.filter(g => allowedIds.has(g.id))
   const status = e.status as ExamStatus
   const participantViews = ((participants || []) as ParticipantRow[]).map(participant => {
     const member = firstRelation(participant.members)
@@ -141,7 +143,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
           examId={e.id}
           canEdit={canEdit}
           members={(members || []) as Pick<Member, 'id' | 'first_name' | 'last_name' | 'graduation_id'>[]}
-          graduations={(graduations || []) as Graduation[]}
+          graduations={visibleGraduations}
           initialParticipants={participantViews}
         />
       </div>

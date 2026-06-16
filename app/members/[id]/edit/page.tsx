@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { MemberForm } from '@/components/members/MemberForm'
+import { getVisibleGraduations } from '@/lib/graduations'
 import type { Graduation, Member } from '@/types'
 
 export default async function EditMemberPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,7 +42,7 @@ export default async function EditMemberPage({ params }: { params: Promise<{ id:
   return (
     <MemberForm
       member={member as Member}
-      graduations={(graduations || []) as Graduation[]}
+      graduations={getVisibleGraduations((graduations || []) as Graduation[])}
     />
   )
 }

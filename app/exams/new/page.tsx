@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerClient } from '@/lib/supabase/server'
 import { ExamForm } from '@/components/exams/ExamForm'
+import { getVisibleGraduations } from '@/lib/graduations'
 import type { Graduation } from '@/types'
 
 export default async function NewExamPage() {
@@ -28,5 +29,5 @@ export default async function NewExamPage() {
     redirect('/exams')
   }
 
-  return <ExamForm graduations={(graduations || []) as Graduation[]} examinerId={session.user.id} />
+  return <ExamForm graduations={getVisibleGraduations((graduations || []) as Graduation[])} examinerId={session.user.id} />
 }

@@ -41,16 +41,16 @@ export function Sidebar({ profile }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-60 bg-surface-0 border-r border-surface-3 flex flex-col z-40">
+    <aside className="fixed inset-y-0 left-0 w-60 bg-ink text-white border-r border-ink-3 flex flex-col z-40">
       {/* Header */}
-      <div className="px-4 py-5 border-b border-surface-3">
+      <div className="px-4 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-ink rounded-lg flex items-center justify-center flex-shrink-0">
-            <Shield className="w-4 h-4 text-surface-0" />
+          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+            <Shield className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-ink truncate">Vereinsverwaltung</p>
-            <p className="text-xs text-ink-subtle truncate">Dashboard</p>
+            <p className="text-sm font-semibold text-white truncate">Taekwon-Do Kaufungen</p>
+            <p className="text-xs text-white/50 truncate">Mitglieder Dashboard</p>
           </div>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function Sidebar({ profile }: SidebarProps) {
         {profile?.role === 'admin' && (
           <>
             <div className="pt-4 pb-1 px-3">
-              <p className="text-[10px] font-semibold text-ink-faint uppercase tracking-widest">
+              <p className="text-[10px] font-semibold text-white/35 uppercase tracking-widest">
                 Administration
               </p>
             </div>
@@ -91,24 +91,24 @@ export function Sidebar({ profile }: SidebarProps) {
       </nav>
 
       {/* User */}
-      <div className="px-3 py-4 border-t border-surface-3">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-          <div className="w-7 h-7 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-medium text-ink-muted">
+      <div className="px-3 py-4 border-t border-white/10">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5">
+          <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-medium text-white/80">
               {profile?.full_name?.charAt(0).toUpperCase() || '?'}
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-ink truncate">
+            <p className="text-xs font-medium text-white truncate">
               {profile?.full_name || profile?.email}
             </p>
-            <p className="text-[11px] text-ink-subtle truncate">
+            <p className="text-[11px] text-white/45 truncate">
               {profile ? ROLE_LABELS[profile.role] : ''}
             </p>
           </div>
           <button
             onClick={handleLogout}
-            className="text-ink-subtle hover:text-ink transition-colors"
+            className="text-white/45 hover:text-white transition-colors"
             title="Abmelden"
           >
             <LogOut className="w-4 h-4" />

@@ -3,7 +3,9 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { GraduationChart } from '@/components/dashboard/GraduationChart'
 import { UpcomingExams } from '@/components/dashboard/UpcomingExams'
 import { Users, Calendar, Award, TrendingUp } from 'lucide-react'
+import { getVisibleGraduations } from '@/lib/graduations'
 import { formatDate } from '@/lib/utils'
+import type { Graduation } from '@/types'
 
 type GraduationSummary = { name: string }
 
@@ -90,7 +92,7 @@ export default async function DashboardPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Graduation Distribution */}
         <div className="lg:col-span-2">
-          <GraduationChart distribution={gradDist} graduations={graduations || []} />
+          <GraduationChart distribution={gradDist} graduations={getVisibleGraduations((graduations || []) as Graduation[])} />
         </div>
 
         {/* Upcoming Exams */}

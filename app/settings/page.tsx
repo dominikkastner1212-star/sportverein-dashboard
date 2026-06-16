@@ -1,6 +1,8 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Shield, User } from 'lucide-react'
+import { getVisibleGraduations } from '@/lib/graduations'
+import type { Graduation } from '@/types'
 
 const ROLE_LABELS = {
   admin: { label: 'Administrator', color: 'bg-red-50 text-red-700 border-red-200' },
@@ -31,6 +33,8 @@ export default async function SettingsPage() {
     .from('graduations')
     .select('*')
     .order('rank_order')
+
+  const visibleGraduations = getVisibleGraduations((graduations || []) as Graduation[])
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -75,10 +79,10 @@ export default async function SettingsPage() {
       <div className="card">
         <div className="px-6 py-4 border-b border-surface-3">
           <h2 className="section-title">Gürtelstufen</h2>
-          <p className="section-subtitle mt-0.5">{graduations?.length || 0} konfigurierte Stufen</p>
+          <p className="section-subtitle mt-0.5">{visibleGraduations.length} konfigurierte Stufen</p>
         </div>
         <div className="divide-y divide-surface-3">
-          {(graduations || []).map(g => (
+          {visibleGraduations.map(g => (
             <div key={g.id} className="flex items-center gap-4 px-6 py-3.5">
               <div
                 className="w-6 h-6 rounded-full border-2 flex-shrink-0"

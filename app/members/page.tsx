@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { MembersClient } from '@/components/members/MembersClient'
+import { getVisibleGraduations } from '@/lib/graduations'
 import type { Member, Graduation } from '@/types'
 
 export default async function MembersPage() {
@@ -28,7 +29,7 @@ export default async function MembersPage() {
   return (
     <MembersClient
       members={(members || []) as (Member & { graduation?: Graduation })[]}
-      graduations={(graduations || []) as Graduation[]}
+      graduations={getVisibleGraduations((graduations || []) as Graduation[])}
       canEdit={canEdit}
     />
   )

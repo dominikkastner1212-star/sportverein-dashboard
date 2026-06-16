@@ -16,7 +16,6 @@ interface ExamParticipantView {
   target_graduation_name: string | null
   passed: boolean | null
 }
-
 interface ExamParticipantsManagerProps {
   examId: string
   examDate: string
@@ -44,6 +43,7 @@ export function ExamParticipantsManager({
   const [submitting, setSubmitting] = useState(false)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [checklistReadyByParticipant, setChecklistReadyByParticipant] = useState<Record<string, boolean>>({})
 
   const participantMemberIds = useMemo(
     () => new Set(participants.map(participant => participant.member_id)),
@@ -107,7 +107,18 @@ export function ExamParticipantsManager({
     }
 
     setParticipants(prev => prev.filter(participant => participant.id !== id))
+    setChecklistReadyByParticipant(prev => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
     router.refresh()
+  }
+
+  function updateChecklistReady(participantId: string, isReady: boolean) {
+    setChecklistReadyByParticipant(prev => (
+      prev[participantId] === isReady ? prev : { ...prev, [participantId]: isReady }
+    ))
   }
 
   async function setParticipantResult(participant: ExamParticipantView, passed: boolean | null) {
@@ -116,6 +127,12 @@ export function ExamParticipantsManager({
 
     if (passed !== null && !participant.target_graduation_id) {
       setError('Bitte zuerst einen Zielguertel fuer den Teilnehmer hinterlegen.')
+      setUpdatingId(null)
+      return
+    }
+
+    if (passed !== null && checklistReadyByParticipant[participant.id] !== true) {
+      setError('Die Pruefungscheckliste muss fuer diesen Teilnehmer vollstaendig abgehakt sein.')
       setUpdatingId(null)
       return
     }
@@ -248,73 +265,91 @@ export function ExamParticipantsManager({
         <p className="text-sm text-ink-muted">Noch keine Teilnehmer hinterlegt.</p>
       ) : (
         <div className="space-y-2">
-          {participants.map(participant => (
-            <div key={participant.id} className="rounded-lg bg-surface-1 px-3 py-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-ink truncate">{participant.member_name}</p>
-                  <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                    <p className="text-xs text-ink-subtle">
-                      Zielrang: {participant.target_graduation_name || 'Kein Zielguertel'}
-                    </p>
-                    <span className={cn(
-                      'badge text-[10px]',
-                      participant.passed === true && 'bg-green-50 text-green-700 border-green-200',
-                      participant.passed === false && 'bg-red-50 text-red-700 border-red-200',
-                      participant.passed === null && 'bg-surface-2 text-ink-muted border-surface-3'
-                    )}>
-                      {participant.passed === true ? 'Bestanden' : participant.passed === false ? 'Nicht bestanden' : 'Offen'}
-                    </span>
+          {participants.map(participant => {
+            const checklistReady = checklistReadyByParticipant[participant.id] === true
+            const canSubmitResult = checklistReady && !!participant.target_graduation_id
+
+            return (
+              <div key={participant.id} className="rounded-lg bg-surface-1 px-3 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink truncate">{participant.member_name}</p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <p className="text-xs text-ink-subtle">
+                        Zielrang: {participant.target_graduation_name || 'Kein Zielguertel'}
+                      </p>
+                      <span className={cn(
+                        'badge text-[10px]',
+                        participant.passed === true && 'bg-green-50 text-green-700 border-green-200',
+                        participant.passed === false && 'bg-red-50 text-red-700 border-red-200',
+                        participant.passed === null && 'bg-surface-2 text-ink-muted border-surface-3'
+                      )}>
+                        {participant.passed === true ? 'Bestanden' : participant.passed === false ? 'Nicht bestanden' : 'Offen'}
+                      </span>
+                      <span className={cn(
+                        'badge text-[10px]',
+                        checklistReady
+                          ? 'bg-green-50 text-green-700 border-green-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      )}>
+                        {checklistReady ? 'Checkliste komplett' : 'Checkliste offen'}
+                      </span>
+                    </div>
                   </div>
+
+                  {canEdit && (
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        type="button"
+                        className="btn-ghost btn-sm p-1.5 text-green-700"
+                        onClick={() => setParticipantResult(participant, true)}
+                        disabled={updatingId === participant.id || !canSubmitResult}
+                        title={canSubmitResult ? 'Bestanden' : 'Checkliste und Zielguertel erforderlich'}
+                      >
+                        {updatingId === participant.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost btn-sm p-1.5 text-red-600"
+                        onClick={() => setParticipantResult(participant, false)}
+                        disabled={updatingId === participant.id || !canSubmitResult}
+                        title={canSubmitResult ? 'Nicht bestanden' : 'Checkliste und Zielguertel erforderlich'}
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-ghost btn-sm p-1.5"
+                        onClick={() => setParticipantResult(participant, null)}
+                        disabled={updatingId === participant.id}
+                        title="Offen setzen"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        className="p-1.5 text-ink-subtle hover:text-red-600"
+                        onClick={() => removeParticipant(participant.id)}
+                        aria-label="Teilnehmer entfernen"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                {canEdit && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <button
-                      type="button"
-                      className="btn-ghost btn-sm p-1.5 text-green-700"
-                      onClick={() => setParticipantResult(participant, true)}
-                      disabled={updatingId === participant.id}
-                      title="Bestanden"
-                    >
-                      {updatingId === participant.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost btn-sm p-1.5 text-red-600"
-                      onClick={() => setParticipantResult(participant, false)}
-                      disabled={updatingId === participant.id}
-                      title="Nicht bestanden"
-                    >
-                      <XCircle className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-ghost btn-sm p-1.5"
-                      onClick={() => setParticipantResult(participant, null)}
-                      disabled={updatingId === participant.id}
-                      title="Offen setzen"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      className="text-ink-subtle hover:text-red-600 p-1.5"
-                      onClick={() => removeParticipant(participant.id)}
-                      aria-label="Teilnehmer entfernen"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                <div className="mt-3 border-t border-surface-3 pt-3">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-muted">Aufgaben</p>
+                  <ChecklistSection
+                    memberId={participant.member_id}
+                    examId={examId}
+                    role={role}
+                    onReadyChange={isReady => updateChecklistReady(participant.id, isReady)}
+                  />
+                </div>
               </div>
-
-              <div className="mt-3 border-t border-surface-3 pt-3">
-                <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-2">Aufgaben</p>
-                <ChecklistSection memberId={participant.member_id} examId={examId} role={role} />
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

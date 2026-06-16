@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState, useCallback } from 'react'
 import { CheckCircle2, Circle, Loader2, AlertCircle } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { cn, formatDate } from '@/lib/utils'
 import type { ChecklistItem, MemberChecklistStatus, UserRole } from '@/types'
 
@@ -11,6 +11,7 @@ interface ChecklistSectionProps {
   examId?: string
   templateId?: string
   role: UserRole
+  onReadyChange?: (isReady: boolean) => void
 }
 
 interface ChecklistEntry {
@@ -18,7 +19,13 @@ interface ChecklistEntry {
   status: MemberChecklistStatus | null
 }
 
-export function ChecklistSection({ memberId, examId, templateId, role }: ChecklistSectionProps) {
+export function ChecklistSection({
+  memberId,
+  examId,
+  templateId,
+  role,
+  onReadyChange,
+}: ChecklistSectionProps) {
   const supabase = createClient()
   const [entries, setEntries] = useState<ChecklistEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,7 +36,6 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
   const load = useCallback(async () => {
     setLoading(true)
 
-    // Get checklist items for the template (or default template)
     let query = supabase.from('checklist_items').select('*, checklist_templates!inner(*)')
 
     if (templateId) {
@@ -46,8 +52,7 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
       return
     }
 
-    // Get existing statuses for this member
-    const itemIds = items.map(i => i.id)
+    const itemIds = items.map(item => item.id)
     let statusQuery = supabase
       .from('member_checklist_status')
       .select('*')
@@ -59,20 +64,28 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
     const { data: statuses } = await statusQuery
 
     const statusMap: Record<string, MemberChecklistStatus> = {}
-    ;(statuses || []).forEach(s => { statusMap[s.checklist_item_id] = s as MemberChecklistStatus })
+    ;(statuses || []).forEach(status => {
+      statusMap[status.checklist_item_id] = status as MemberChecklistStatus
+    })
 
     setEntries(items.map(item => ({ item: item as ChecklistItem, status: statusMap[item.id] || null })))
     setLoading(false)
   }, [memberId, examId, templateId, supabase])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    load()
+  }, [load])
 
   async function toggleItem(entry: ChecklistEntry) {
     if (!canEdit) return
+
     setToggling(entry.item.id)
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setToggling(null); return }
+    if (!user) {
+      setToggling(null)
+      return
+    }
 
     const newDone = !entry.status?.is_done
 
@@ -100,10 +113,12 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
     setToggling(null)
   }
 
-  const doneCount = entries.filter(e => e.status?.is_done).length
-  const requiredCount = entries.filter(e => e.item.is_required).length
-  const requiredDoneCount = entries.filter(e => e.item.is_required && e.status?.is_done).length
-  const allRequiredDone = requiredCount === 0 || requiredDoneCount === requiredCount
+  const doneCount = entries.filter(entry => entry.status?.is_done).length
+  const allItemsDone = entries.length > 0 && doneCount === entries.length
+
+  useEffect(() => {
+    if (!loading) onReadyChange?.(allItemsDone)
+  }, [loading, allItemsDone, onReadyChange])
 
   if (loading) {
     return (
@@ -116,44 +131,44 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
   if (entries.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-sm text-ink-muted">Keine Checkliste verfügbar</p>
+        <p className="text-sm text-ink-muted">Keine Checkliste verfuegbar</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
-      {/* Progress */}
       <div className="flex items-center gap-4">
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-ink-muted mb-1.5">
+          <div className="mb-1.5 flex justify-between text-xs text-ink-muted">
             <span>{doneCount} von {entries.length} erledigt</span>
-            {!allRequiredDone && (
+            {!allItemsDone && (
               <span className="flex items-center gap-1 text-amber-600">
-                <AlertCircle className="w-3 h-3" />
-                {requiredCount - requiredDoneCount} Pflicht offen
+                <AlertCircle className="h-3 w-3" />
+                {entries.length - doneCount} offen
               </span>
             )}
           </div>
-          <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
+          <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
             <div
               className={cn(
                 'h-full rounded-full transition-all duration-300',
-                allRequiredDone ? 'bg-green-500' : 'bg-amber-400'
+                allItemsDone ? 'bg-green-500' : 'bg-amber-400'
               )}
               style={{ width: `${entries.length > 0 ? (doneCount / entries.length) * 100 : 0}%` }}
             />
           </div>
         </div>
-        <span className={cn(
-          'text-xs font-medium px-2 py-1 rounded-full',
-          allRequiredDone ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
-        )}>
-          {allRequiredDone ? 'Prüfungsbereit' : 'Nicht bereit'}
+        <span
+          className={cn(
+            'rounded-full px-2 py-1 text-xs font-medium',
+            allItemsDone ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
+          )}
+        >
+          {allItemsDone ? 'Pruefungsbereit' : 'Nicht bereit'}
         </span>
       </div>
 
-      {/* Items */}
       <div className="space-y-1.5">
         {entries.map(entry => {
           const done = entry.status?.is_done || false
@@ -164,36 +179,36 @@ export function ChecklistSection({ memberId, examId, templateId, role }: Checkli
               key={entry.item.id}
               onClick={() => !isLoading && toggleItem(entry)}
               className={cn(
-                'flex items-start gap-3 p-3 rounded-lg transition-all duration-150',
+                'flex items-start gap-3 rounded-lg p-3 transition-all duration-150',
                 canEdit ? 'cursor-pointer hover:bg-surface-1' : '',
                 done ? 'opacity-60' : ''
               )}
             >
               <div className="mt-0.5 flex-shrink-0">
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 text-ink-muted animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin text-ink-muted" />
                 ) : done ? (
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
                 ) : (
-                  <Circle className={cn('w-4 h-4', entry.item.is_required ? 'text-amber-500' : 'text-ink-faint')} />
+                  <Circle className={cn('h-4 w-4', entry.item.is_required ? 'text-amber-500' : 'text-ink-faint')} />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className={cn('text-sm', done ? 'line-through text-ink-subtle' : 'text-ink')}>
+                  <p className={cn('text-sm', done ? 'text-ink-subtle line-through' : 'text-ink')}>
                     {entry.item.label}
                   </p>
                   {entry.item.is_required && (
-                    <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                    <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-600">
                       Pflicht
                     </span>
                   )}
                 </div>
                 {entry.item.description && (
-                  <p className="text-xs text-ink-subtle mt-0.5">{entry.item.description}</p>
+                  <p className="mt-0.5 text-xs text-ink-subtle">{entry.item.description}</p>
                 )}
                 {done && entry.status?.done_at && (
-                  <p className="text-[11px] text-ink-faint mt-0.5">
+                  <p className="mt-0.5 text-[11px] text-ink-faint">
                     Erledigt am {formatDate(entry.status.done_at)}
                   </p>
                 )}

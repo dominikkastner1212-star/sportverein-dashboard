@@ -61,7 +61,29 @@ export function ChecklistSection({
 
     if (examId) statusQuery = statusQuery.eq('exam_id', examId)
 
-    const { data: statuses } = await statusQuery
+    let { data: statuses } = await statusQuery
+
+    if (examId && canEdit) {
+      const existingStatusIds = new Set((statuses || []).map(status => status.checklist_item_id))
+      const missingItems = items.filter(item => !existingStatusIds.has(item.id))
+
+      if (missingItems.length > 0) {
+        await supabase.from('member_checklist_status').insert(
+          missingItems.map(item => ({
+            member_id: memberId,
+            exam_id: examId,
+            checklist_item_id: item.id,
+            is_done: false,
+            done_at: null,
+            done_by: null,
+            notes: null,
+          }))
+        )
+
+        const { data: refreshedStatuses } = await statusQuery
+        statuses = refreshedStatuses
+      }
+    }
 
     const statusMap: Record<string, MemberChecklistStatus> = {}
     ;(statuses || []).forEach(status => {
@@ -70,7 +92,7 @@ export function ChecklistSection({
 
     setEntries(items.map(item => ({ item: item as ChecklistItem, status: statusMap[item.id] || null })))
     setLoading(false)
-  }, [memberId, examId, templateId, supabase])
+  }, [memberId, examId, templateId, supabase, canEdit])
 
   useEffect(() => {
     load()

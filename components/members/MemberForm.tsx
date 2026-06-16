@@ -37,6 +37,13 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
     emergency_phone: member?.emergency_phone || '',
     notes: member?.notes || '',
   })
+  const sortedGraduations = [...graduations].sort((a, b) => a.rank_order - b.rank_order)
+  const currentGraduation = sortedGraduations.find(graduation => graduation.id === form.graduation_id) || null
+  const nextGraduation = currentGraduation
+    ? sortedGraduations.find(graduation => graduation.rank_order > currentGraduation.rank_order) || null
+    : sortedGraduations[0] || null
+  const miniKupMatch = currentGraduation?.name.match(/Mini KUP\s+([1-4])/i)
+  const miniKupLevel = miniKupMatch ? Number(miniKupMatch[1]) : null
 
   function updateField<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
     setForm(prev => ({ ...prev, [field]: value }))
@@ -163,20 +170,66 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
             />
           </div>
 
-          <div>
-            <label className="input-label">Guertel</label>
-            <select
-              className="input"
-              value={form.graduation_id}
-              onChange={event => updateField('graduation_id', event.target.value)}
-            >
-              <option value="">Kein Guertel</option>
-              {graduations.map(graduation => (
-                <option key={graduation.id} value={graduation.id}>
-                  {graduation.name}
-                </option>
-              ))}
-            </select>
+          <div className="md:col-span-2">
+            <label className="input-label">Guertelstatus</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-lg border border-surface-3 bg-surface-0 p-4">
+                <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-2">
+                  Aktueller Guertel
+                </p>
+                <select
+                  className="input"
+                  value={form.graduation_id}
+                  onChange={event => updateField('graduation_id', event.target.value)}
+                >
+                  <option value="">Kein Guertel</option>
+                  {sortedGraduations.map(graduation => (
+                    <option key={graduation.id} value={graduation.id}>
+                      {graduation.name}
+                    </option>
+                  ))}
+                </select>
+                {currentGraduation && (
+                  <div className="flex items-center gap-2 mt-3 text-xs text-ink-muted">
+                    <span
+                      className="h-3 w-3 rounded-full border"
+                      style={{ backgroundColor: currentGraduation.color, borderColor: currentGraduation.border_color }}
+                    />
+                    Rang {currentGraduation.rank_order}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-lg border border-surface-3 bg-surface-1 p-4">
+                <p className="text-xs font-medium text-ink-muted uppercase tracking-wide mb-2">
+                  Vorbereitung naechster Guertel
+                </p>
+                {nextGraduation ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-4 w-4 rounded-full border"
+                        style={{ backgroundColor: nextGraduation.color, borderColor: nextGraduation.border_color }}
+                      />
+                      <span className="text-sm font-medium text-ink">{nextGraduation.name}</span>
+                    </div>
+                    {miniKupLevel && (
+                      <div className="flex items-center gap-1.5">
+                        {[1, 2, 3, 4].map(point => (
+                          <span
+                            key={point}
+                            className={`h-2.5 w-2.5 rounded-full ${point <= miniKupLevel ? 'bg-accent' : 'bg-surface-3'}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-ink-subtle">Automatisch aus der Rangfolge berechnet.</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-ink-muted">Keine weitere Stufe vorhanden.</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div>

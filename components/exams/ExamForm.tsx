@@ -6,30 +6,32 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Database } from '@/lib/supabase/database.types'
-import type { ExamStatus, Graduation } from '@/types'
+import type { Exam, ExamStatus, Graduation } from '@/types'
 
 interface ExamFormProps {
   graduations: Graduation[]
-  examinerId: string
+  examinerId: string | null
+  exam?: Exam
 }
 
 type ExamInsert = Database['public']['Tables']['exams']['Insert']
 
 const today = new Date().toISOString().split('T')[0]
 
-export function ExamForm({ graduations, examinerId }: ExamFormProps) {
+export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
   const router = useRouter()
   const supabase = createClient()
+  const isEditing = Boolean(exam)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [form, setForm] = useState({
-    title: '',
-    date: today,
-    time: '',
-    location: '',
-    description: '',
-    status: 'planned' as ExamStatus,
-    allowed_graduation_ids: [] as string[],
+    title: exam?.title || '',
+    date: exam?.date || today,
+    time: exam?.time?.slice(0, 5) || '',
+    location: exam?.location || '',
+    description: exam?.description || '',
+    status: exam?.status || ('planned' as ExamStatus),
+    allowed_graduation_ids: exam?.allowed_graduation_ids || ([] as string[]),
   })
 
   function updateField<K extends keyof typeof form>(field: K, value: (typeof form)[K]) {
@@ -61,19 +63,19 @@ export function ExamForm({ graduations, examinerId }: ExamFormProps) {
       allowed_graduation_ids: form.allowed_graduation_ids,
     }
 
-    const { data, error: insertError } = await supabase
-      .from('exams')
-      .insert(payload)
-      .select('id')
-      .single()
+    const query = isEditing && exam
+      ? supabase.from('exams').update(payload).eq('id', exam.id).select('id').single()
+      : supabase.from('exams').insert(payload).select('id').single()
 
-    if (insertError || !data) {
-      setError(insertError?.message || 'Pruefung konnte nicht erstellt werden.')
+    const { data, error: saveError } = await query
+
+    if (saveError || !data) {
+      setError(saveError?.message || 'Pruefung konnte nicht gespeichert werden.')
       setSubmitting(false)
       return
     }
 
-    router.push('/exams')
+    router.push(isEditing ? `/exams/${data.id}` : '/exams')
     router.refresh()
   }
 
@@ -85,7 +87,9 @@ export function ExamForm({ graduations, examinerId }: ExamFormProps) {
       </Link>
 
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Neue Pruefung</h1>
+        <h1 className="text-2xl font-semibold text-ink">
+          {isEditing ? 'Pruefung bearbeiten' : 'Neue Pruefung'}
+        </h1>
         <p className="text-sm text-ink-muted mt-1">Termin, Ort und zugelassene Guertel erfassen</p>
       </div>
 

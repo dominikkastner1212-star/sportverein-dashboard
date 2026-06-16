@@ -182,7 +182,9 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
                   <CheckCircle className="w-4 h-4 text-green-500" />
                 )}
                 {item.state === 'error' && (
-                  <AlertCircle className="w-4 h-4 text-red-500" title={item.error} />
+                  <span title={item.error}>
+                    <AlertCircle className="w-4 h-4 text-red-500" />
+                  </span>
                 )}
                 {item.state === 'idle' && (
                   <button onClick={() => removeFile(i)} className="text-ink-subtle hover:text-ink">

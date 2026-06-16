@@ -36,15 +36,34 @@ export function ChecklistSection({
   const load = useCallback(async () => {
     setLoading(true)
 
-    let query = supabase.from('checklist_items').select('*, checklist_templates!inner(*)')
+    let resolvedTemplateId = templateId
 
-    if (templateId) {
-      query = query.eq('template_id', templateId)
-    } else {
-      query = query.eq('checklist_templates.is_default', true)
+    if (!resolvedTemplateId) {
+      const { data: templates } = await supabase
+        .from('checklist_templates')
+        .select('id, name, is_default')
+        .order('created_at')
+
+      const normalizeTemplateName = (value: string) => value.trim().toLowerCase()
+      const resolvedTemplate = (templates || []).find(template => {
+        const normalizedName = normalizeTemplateName(template.name)
+        return normalizedName === 'prüfung' || normalizedName === 'pruefung'
+      }) || (templates || []).find(template => template.is_default) || (templates || [])[0]
+
+      resolvedTemplateId = resolvedTemplate?.id
     }
 
-    const { data: items } = await query.order('sort_order')
+    if (!resolvedTemplateId) {
+      setEntries([])
+      setLoading(false)
+      return
+    }
+
+    const { data: items } = await supabase
+      .from('checklist_items')
+      .select('*')
+      .eq('template_id', resolvedTemplateId)
+      .order('sort_order')
 
     if (!items || items.length === 0) {
       setEntries([])
@@ -153,7 +172,7 @@ export function ChecklistSection({
   if (entries.length === 0) {
     return (
       <div className="text-center py-6">
-        <p className="text-sm text-ink-muted">Keine Checkliste verfuegbar</p>
+        <p className="text-sm text-ink-muted">Keine Checkliste verfügbar</p>
       </div>
     )
   }
@@ -187,7 +206,7 @@ export function ChecklistSection({
             allItemsDone ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'
           )}
         >
-          {allItemsDone ? 'Pruefungsbereit' : 'Nicht bereit'}
+          {allItemsDone ? 'Prüfungsbereit' : 'Nicht bereit'}
         </span>
       </div>
 

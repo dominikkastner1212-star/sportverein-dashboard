@@ -70,7 +70,7 @@ export function ExamParticipantsManager({
       .single()
 
     if (insertError || !data) {
-      setError(insertError?.message || 'Teilnehmer konnte nicht hinzugefuegt werden.')
+      setError(insertError?.message || 'Teilnehmer konnte nicht hinzugefügt werden.')
       setSubmitting(false)
       return
     }
@@ -126,13 +126,13 @@ export function ExamParticipantsManager({
     setUpdatingId(participant.id)
 
     if (passed !== null && !participant.target_graduation_id) {
-      setError('Bitte zuerst einen Zielguertel fuer den Teilnehmer hinterlegen.')
+      setError('Bitte zuerst einen Zielgürtel für den Teilnehmer hinterlegen.')
       setUpdatingId(null)
       return
     }
 
     if (passed !== null && checklistReadyByParticipant[participant.id] !== true) {
-      setError('Die Pruefungscheckliste muss fuer diesen Teilnehmer vollstaendig abgehakt sein.')
+      setError('Die Prüfungscheckliste muss für diesen Teilnehmer vollständig abgehakt sein.')
       setUpdatingId(null)
       return
     }
@@ -222,7 +222,7 @@ export function ExamParticipantsManager({
             value={memberId}
             onChange={event => setMemberId(event.target.value)}
           >
-            <option value="">Mitglied auswaehlen</option>
+            <option value="">Mitglied auswählen</option>
             {availableMembers.map(member => (
               <option key={member.id} value={member.id}>
                 {member.first_name} {member.last_name}
@@ -235,7 +235,7 @@ export function ExamParticipantsManager({
             value={targetGraduationId}
             onChange={event => setTargetGraduationId(event.target.value)}
           >
-            <option value="">Zielguertel optional</option>
+            <option value="">Zielgürtel optional</option>
             {graduations.map(graduation => (
               <option key={graduation.id} value={graduation.id}>
                 {graduation.name}
@@ -250,7 +250,7 @@ export function ExamParticipantsManager({
             onClick={addParticipant}
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-            Hinzufuegen
+            Hinzufügen
           </button>
         </div>
       )}
@@ -276,7 +276,7 @@ export function ExamParticipantsManager({
                     <p className="text-sm font-medium text-ink truncate">{participant.member_name}</p>
                     <div className="mt-0.5 flex flex-wrap items-center gap-2">
                       <p className="text-xs text-ink-subtle">
-                        Zielrang: {participant.target_graduation_name || 'Kein Zielguertel'}
+                        Zielrang: {participant.target_graduation_name || 'Kein Zielgürtel'}
                       </p>
                       <span className={cn(
                         'badge text-[10px]',
@@ -304,7 +304,7 @@ export function ExamParticipantsManager({
                         className="btn-ghost btn-sm p-1.5 text-green-700"
                         onClick={() => setParticipantResult(participant, true)}
                         disabled={updatingId === participant.id || !canSubmitResult}
-                        title={canSubmitResult ? 'Bestanden' : 'Checkliste und Zielguertel erforderlich'}
+                        title={canSubmitResult ? 'Bestanden' : 'Checkliste und Zielgürtel erforderlich'}
                       >
                         {updatingId === participant.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                       </button>
@@ -313,7 +313,7 @@ export function ExamParticipantsManager({
                         className="btn-ghost btn-sm p-1.5 text-red-600"
                         onClick={() => setParticipantResult(participant, false)}
                         disabled={updatingId === participant.id || !canSubmitResult}
-                        title={canSubmitResult ? 'Nicht bestanden' : 'Checkliste und Zielguertel erforderlich'}
+                        title={canSubmitResult ? 'Nicht bestanden' : 'Checkliste und Zielgürtel erforderlich'}
                       >
                         <XCircle className="w-4 h-4" />
                       </button>

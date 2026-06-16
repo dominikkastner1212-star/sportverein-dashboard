@@ -1,13 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Plus, Trash2, GripVertical, CheckSquare, Star, StarOff, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import {
-  Plus, Trash2, GripVertical, Save, CheckSquare,
-  Star, StarOff, Loader2, ChevronDown,
-} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ChecklistTemplate, ChecklistItem } from '@/types'
+
+function isExamTemplate(name: string) {
+  const normalizedName = name.trim().toLowerCase()
+  return normalizedName === 'prüfung' || normalizedName === 'pruefung'
+}
 
 export default function ChecklistsPage() {
   const supabase = createClient()
@@ -15,7 +17,6 @@ export default function ChecklistsPage() {
   const [selected, setSelected] = useState<string | null>(null)
   const [items, setItems] = useState<ChecklistItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [newItemLabel, setNewItemLabel] = useState('')
 
   useEffect(() => {
@@ -31,8 +32,12 @@ export default function ChecklistsPage() {
       .from('checklist_templates')
       .select('*')
       .order('created_at')
-    setTemplates((data || []) as ChecklistTemplate[])
-    if (data && data.length > 0 && !selected) setSelected(data[0].id)
+
+    const nextTemplates = (data || []) as ChecklistTemplate[]
+    const preferredTemplate = nextTemplates.find(template => isExamTemplate(template.name)) || nextTemplates[0]
+
+    setTemplates(nextTemplates)
+    if (preferredTemplate && !selected) setSelected(preferredTemplate.id)
     setLoading(false)
   }
 
@@ -42,13 +47,14 @@ export default function ChecklistsPage() {
       .select('*')
       .eq('template_id', templateId)
       .order('sort_order')
+
     setItems((data || []) as ChecklistItem[])
   }
 
   async function addItem() {
     if (!selected || !newItemLabel.trim()) return
 
-    const maxOrder = items.reduce((max, i) => Math.max(max, i.sort_order), 0)
+    const maxOrder = items.reduce((max, item) => Math.max(max, item.sort_order), 0)
     const { data, error } = await supabase
       .from('checklist_items')
       .insert({
@@ -68,8 +74,9 @@ export default function ChecklistsPage() {
 
   async function deleteItem(id: string) {
     if (!confirm('Diesen Punkt löschen?')) return
+
     await supabase.from('checklist_items').delete().eq('id', id)
-    setItems(prev => prev.filter(i => i.id !== id))
+    setItems(prev => prev.filter(item => item.id !== id))
   }
 
   async function toggleRequired(item: ChecklistItem) {
@@ -80,12 +87,16 @@ export default function ChecklistsPage() {
       .select()
       .single()
 
-    if (data) setItems(prev => prev.map(i => i.id === item.id ? data as ChecklistItem : i))
+    if (data) {
+      setItems(prev => prev.map(currentItem => (
+        currentItem.id === item.id ? data as ChecklistItem : currentItem
+      )))
+    }
   }
 
   async function updateLabel(id: string, label: string) {
     await supabase.from('checklist_items').update({ label }).eq('id', id)
-    setItems(prev => prev.map(i => i.id === id ? { ...i, label } : i))
+    setItems(prev => prev.map(item => (item.id === id ? { ...item, label } : item)))
   }
 
   async function createTemplate() {
@@ -104,51 +115,55 @@ export default function ChecklistsPage() {
     }
   }
 
-  const selectedTemplate = templates.find(t => t.id === selected)
+  const selectedTemplate = templates.find(template => template.id === selected)
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 text-ink-faint animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-ink-faint" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-ink">Checklisten</h1>
-          <p className="text-sm text-ink-muted mt-1">Prüfungsvoraussetzungen verwalten</p>
+          <p className="mt-1 text-sm text-ink-muted">Prüfungsvoraussetzungen verwalten</p>
         </div>
         <button onClick={createTemplate} className="btn-secondary">
-          <Plus className="w-4 h-4" />
+          <Plus className="h-4 w-4" />
           Neue Vorlage
         </button>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
-        {/* Template sidebar */}
+      <div className="grid gap-6 lg:grid-cols-4">
         <div className="space-y-1.5">
-          <p className="text-xs font-semibold text-ink-muted uppercase tracking-wider px-2 mb-2">
+          <p className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-ink-muted">
             Vorlagen
           </p>
-          {templates.map(t => (
+          {templates.map(template => (
             <button
-              key={t.id}
-              onClick={() => setSelected(t.id)}
+              key={template.id}
+              onClick={() => setSelected(template.id)}
               className={cn(
-                'w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-150',
-                selected === t.id
-                  ? 'bg-ink text-surface-0 font-medium'
-                  : 'text-ink-muted hover:text-ink hover:bg-surface-2'
+                'w-full rounded-lg px-3 py-2.5 text-left text-sm transition-all duration-150',
+                selected === template.id
+                  ? 'bg-ink font-medium text-surface-0'
+                  : 'text-ink-muted hover:bg-surface-2 hover:text-ink'
               )}
             >
               <span className="flex items-center gap-2">
-                <CheckSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="truncate">{t.name}</span>
-                {t.is_default && (
-                  <span className="text-[10px] bg-accent-light text-accent px-1.5 rounded ml-auto flex-shrink-0">
+                <CheckSquare className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{template.name}</span>
+                {isExamTemplate(template.name) && (
+                  <span className="ml-auto flex-shrink-0 rounded bg-green-50 px-1.5 text-[10px] text-green-700">
+                    Prüfung
+                  </span>
+                )}
+                {!isExamTemplate(template.name) && template.is_default && (
+                  <span className="ml-auto flex-shrink-0 rounded bg-accent-light px-1.5 text-[10px] text-accent">
                     Standard
                   </span>
                 )}
@@ -157,39 +172,35 @@ export default function ChecklistsPage() {
           ))}
         </div>
 
-        {/* Editor */}
         {selected && selectedTemplate && (
-          <div className="lg:col-span-3 card">
-            <div className="px-6 py-4 border-b border-surface-3 flex items-center justify-between">
+          <div className="card lg:col-span-3">
+            <div className="flex items-center justify-between border-b border-surface-3 px-6 py-4">
               <div>
                 <h2 className="section-title">{selectedTemplate.name}</h2>
                 <p className="section-subtitle mt-0.5">{items.length} Punkte</p>
               </div>
             </div>
 
-            <div className="p-6 space-y-2">
+            <div className="space-y-2 p-6">
               {items.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckSquare className="w-8 h-8 text-ink-faint mx-auto mb-2" />
+                <div className="py-8 text-center">
+                  <CheckSquare className="mx-auto mb-2 h-8 w-8 text-ink-faint" />
                   <p className="text-sm text-ink-muted">Noch keine Punkte</p>
                 </div>
               ) : (
                 items.map((item, index) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-surface-3 bg-surface-0 hover:bg-surface-1 group"
+                    className="group flex items-center gap-3 rounded-lg border border-surface-3 bg-surface-0 p-3 hover:bg-surface-1"
                   >
-                    <GripVertical className="w-4 h-4 text-ink-faint group-hover:text-ink-subtle cursor-grab flex-shrink-0" />
-
-                    <span className="text-xs text-ink-faint w-5 text-center tabular-nums">{index + 1}</span>
-
+                    <GripVertical className="h-4 w-4 flex-shrink-0 cursor-grab text-ink-faint group-hover:text-ink-subtle" />
+                    <span className="w-5 text-center text-xs tabular-nums text-ink-faint">{index + 1}</span>
                     <input
                       type="text"
                       value={item.label}
-                      onChange={e => updateLabel(item.id, e.target.value)}
-                      className="flex-1 text-sm text-ink bg-transparent border-none outline-none focus:ring-0 p-0"
+                      onChange={event => updateLabel(item.id, event.target.value)}
+                      className="flex-1 border-none bg-transparent p-0 text-sm text-ink outline-none focus:ring-0"
                     />
-
                     <button
                       onClick={() => toggleRequired(item)}
                       title={item.is_required ? 'Pflichtpunkt (Klick zum Deaktivieren)' : 'Optional (Klick für Pflicht)'}
@@ -198,43 +209,41 @@ export default function ChecklistsPage() {
                         item.is_required ? 'text-amber-500 hover:text-amber-600' : 'text-ink-faint hover:text-ink-subtle'
                       )}
                     >
-                      {item.is_required ? <Star className="w-4 h-4" /> : <StarOff className="w-4 h-4" />}
+                      {item.is_required ? <Star className="h-4 w-4" /> : <StarOff className="h-4 w-4" />}
                     </button>
-
                     <button
                       onClick={() => deleteItem(item.id)}
-                      className="flex-shrink-0 text-ink-faint hover:text-red-500 transition-colors"
+                      className="flex-shrink-0 text-ink-faint transition-colors hover:text-red-500"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 ))
               )}
 
-              {/* Add item */}
               <div className="flex gap-2 pt-2">
                 <input
                   type="text"
                   className="input flex-1"
                   placeholder="Neuen Punkt hinzufügen…"
                   value={newItemLabel}
-                  onChange={e => setNewItemLabel(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addItem()}
+                  onChange={event => setNewItemLabel(event.target.value)}
+                  onKeyDown={event => event.key === 'Enter' && addItem()}
                 />
                 <button
                   onClick={addItem}
                   disabled={!newItemLabel.trim()}
                   className="btn-primary flex-shrink-0"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                   Hinzufügen
                 </button>
               </div>
             </div>
 
-            <div className="px-6 py-3 border-t border-surface-3 flex items-center gap-2 text-xs text-ink-subtle">
-              <Star className="w-3 h-3 text-amber-500" />
-              Stern-Punkte sind Pflichtfelder und werden bei der Prüfungsbereitschaft berücksichtigt
+            <div className="flex items-center gap-2 border-t border-surface-3 px-6 py-3 text-xs text-ink-subtle">
+              <Star className="h-3 w-3 text-amber-500" />
+              Die Vorlage „Prüfung“ wird in Prüfungen verwendet. Falls sie fehlt, nutzt das System die Standardvorlage.
             </div>
           </div>
         )}

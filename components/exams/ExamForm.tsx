@@ -70,7 +70,7 @@ export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
     const { data, error: saveError } = await query
 
     if (saveError || !data) {
-      setError(saveError?.message || 'Pruefung konnte nicht gespeichert werden.')
+      setError(saveError?.message || 'Prüfung konnte nicht gespeichert werden.')
       setSubmitting(false)
       return
     }
@@ -83,14 +83,14 @@ export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
     <div className="space-y-6 animate-fade-in">
       <Link href="/exams" className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors">
         <ArrowLeft className="w-4 h-4" />
-        Zurueck zu Pruefungen
+        Zurück zu Prüfungen
       </Link>
 
       <div>
         <h1 className="text-2xl font-semibold text-ink">
-          {isEditing ? 'Pruefung bearbeiten' : 'Neue Pruefung'}
+          {isEditing ? 'Prüfung bearbeiten' : 'Neue Prüfung'}
         </h1>
-        <p className="text-sm text-ink-muted mt-1">Termin, Ort und zugelassene Guertel erfassen</p>
+        <p className="text-sm text-ink-muted mt-1">Termin, Ort und zugelassene Gürtel erfassen</p>
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-6 max-w-4xl">
@@ -158,7 +158,7 @@ export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
           </div>
 
           <div className="md:col-span-2">
-            <label className="input-label">Zugelassene Guertel</label>
+            <label className="input-label">Zugelassene Gürtel</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {graduations.map(graduation => (
                 <label key={graduation.id} className="flex items-center gap-2 rounded-lg border border-surface-3 bg-surface-0 px-3 py-2 text-sm text-ink">
@@ -172,7 +172,7 @@ export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
                 </label>
               ))}
               {graduations.length === 0 && (
-                <p className="text-sm text-ink-muted">Noch keine Guertel in Supabase angelegt.</p>
+                <p className="text-sm text-ink-muted">Noch keine Gürtel in Supabase angelegt.</p>
               )}
             </div>
           </div>

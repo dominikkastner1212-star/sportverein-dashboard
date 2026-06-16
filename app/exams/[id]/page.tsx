@@ -81,7 +81,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
     <div className="space-y-6 animate-fade-in">
       <Link href="/exams" className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors">
         <ArrowLeft className="w-4 h-4" />
-        Zurueck zu Pruefungen
+        Zurück zu Prüfungen
       </Link>
 
       <div className="card p-6">
@@ -126,9 +126,9 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="card p-5">
-          <h2 className="section-title mb-4">Zugelassene Guertel</h2>
+          <h2 className="section-title mb-4">Zugelassene Gürtel</h2>
           {allowedGraduations.length === 0 ? (
-            <p className="text-sm text-ink-muted">Alle oder noch keine Guertel ausgewaehlt.</p>
+            <p className="text-sm text-ink-muted">Alle oder noch keine Gürtel ausgewählt.</p>
           ) : (
             <div className="space-y-2">
               {allowedGraduations.map(graduation => (

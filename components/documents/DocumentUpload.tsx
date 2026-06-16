@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, type FileRejection } from 'react-dropzone'
 import { Upload, X, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { cn, formatFileSize, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB } from '@/lib/utils'
 import { DOCUMENT_TYPE_LABELS } from '@/types'
@@ -32,7 +32,7 @@ export function DocumentUpload({ memberId, onSuccess, onCancel }: DocumentUpload
   const [submitting, setSubmitting] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
 
-  const onDrop = useCallback((accepted: File[], rejected: { file: File; errors: { message: string }[] }[]) => {
+  const onDrop = useCallback((accepted: File[], rejected: FileRejection[]) => {
     const newFiles = accepted.map(f => ({
       file: f,
       progress: 0,

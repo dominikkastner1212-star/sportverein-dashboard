@@ -47,7 +47,7 @@ export default async function DashboardPage() {
   // Graduation distribution
   const gradDist: Record<string, number> = {}
   ;(members || []).forEach(m => {
-    const key = getGraduationName(m.graduations) || 'Kein G�rtel'
+    const key = getGraduationName(m.graduations) || 'Kein Guertel'
     gradDist[key] = (gradDist[key] || 0) + 1
   })
 
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
     <div className="space-y-8 animate-fade-in">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-ink">Übersicht</h1>
+        <h1 className="text-2xl font-semibold text-ink">Uebersicht</h1>
         <p className="text-sm text-ink-muted mt-1">
           {formatDate(new Date().toISOString(), 'EEEE, dd. MMMM yyyy')}
         </p>
@@ -75,12 +75,12 @@ export default async function DashboardPage() {
           icon={TrendingUp}
         />
         <StatCard
-          label="Kommende Prüfungen"
+          label="Kommende Pruefungen"
           value={upcomingExams?.length || 0}
           icon={Calendar}
         />
         <StatCard
-          label="Ø Alter"
+          label="Alter"
           value={`${avgAge} J.`}
           icon={Award}
         />

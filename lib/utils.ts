@@ -49,6 +49,24 @@ export const ALLOWED_FILE_TYPES = {
 export const MAX_FILE_SIZE_MB = Number(process.env.NEXT_PUBLIC_MAX_FILE_SIZE_MB || 10)
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
 
+export function downloadCsv(filename: string, headers: string[], rows: (string | number | null)[][]) {
+  const escapeCell = (value: string | number | null) => {
+    const str = value === null || value === undefined ? '' : String(value)
+    return /[",;\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str
+  }
+
+  const lines = [headers, ...rows].map(row => row.map(escapeCell).join(';'))
+  const csv = '﻿' + lines.join('\r\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export function getFileExtension(filename: string): string {
   return filename.split('.').pop()?.toLowerCase() || ''
 }

@@ -4,8 +4,8 @@ import { useState, useMemo, useEffect } from 'react'
 import { MemberCard } from '@/components/members/MemberCard'
 import { MemberFilterBar } from '@/components/members/MemberFilterBar'
 import { Pagination } from '@/components/ui/Pagination'
-import { Plus, Users } from 'lucide-react'
-import { calculateAge } from '@/lib/utils'
+import { Download, Plus, Users } from 'lucide-react'
+import { calculateAge, downloadCsv, formatDate, GENDER_LABELS, MEMBER_GROUP_LABELS, STATUS_LABELS } from '@/lib/utils'
 import type { Member, Graduation, FilterState } from '@/types'
 import Link from 'next/link'
 
@@ -73,6 +73,29 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
+  function handleExport() {
+    downloadCsv(
+      `mitglieder-${new Date().toISOString().slice(0, 10)}.csv`,
+      ['Vorname', 'Nachname', 'Geschlecht', 'Geburtsdatum', 'Alter', 'Mitglied seit', 'Status', 'Gruppe', 'Guertel', 'Letzte Pruefung', 'Telefon', 'E-Mail', 'Notfallkontakt', 'Notfalltelefon'],
+      filtered.map(m => [
+        m.first_name,
+        m.last_name,
+        GENDER_LABELS[m.gender],
+        formatDate(m.birth_date),
+        calculateAge(m.birth_date),
+        formatDate(m.entry_date),
+        STATUS_LABELS[m.status],
+        MEMBER_GROUP_LABELS[m.group_type || 'youth_adults'],
+        m.graduation?.name || '',
+        m.last_exam_date ? formatDate(m.last_exam_date) : '',
+        m.phone || '',
+        m.email || '',
+        m.emergency_contact || '',
+        m.emergency_phone || '',
+      ])
+    )
+  }
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -81,12 +104,18 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
           <h1 className="text-2xl font-semibold text-ink">Mitglieder</h1>
           <p className="text-sm text-ink-muted mt-1">{members.length} Mitglieder insgesamt</p>
         </div>
-        {canEdit && (
-          <Link href="/members/new" className="btn-primary">
-            <Plus className="w-4 h-4" />
-            Neues Mitglied
-          </Link>
-        )}
+        <div className="flex items-center gap-2">
+          <button onClick={handleExport} className="btn-secondary" disabled={filtered.length === 0}>
+            <Download className="w-4 h-4" />
+            CSV exportieren
+          </button>
+          {canEdit && (
+            <Link href="/members/new" className="btn-primary">
+              <Plus className="w-4 h-4" />
+              Neues Mitglied
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Filter */}

@@ -1,12 +1,15 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { MemberCard } from '@/components/members/MemberCard'
 import { MemberFilterBar } from '@/components/members/MemberFilterBar'
+import { Pagination } from '@/components/ui/Pagination'
 import { Plus, Users } from 'lucide-react'
 import { calculateAge } from '@/lib/utils'
 import type { Member, Graduation, FilterState } from '@/types'
 import Link from 'next/link'
+
+const PAGE_SIZE = 24
 
 interface MembersClientProps {
   members: (Member & { graduation?: Graduation; checklistProgress?: { done: number; total: number } | null })[]
@@ -26,6 +29,7 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
     sort_by: 'name',
     sort_direction: 'asc',
   })
+  const [page, setPage] = useState(1)
 
   const filtered = useMemo(() => {
     const result = members.filter(m => {
@@ -61,6 +65,13 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
       return value === 0 ? nameA.localeCompare(nameB) : value * direction
     })
   }, [members, filters])
+
+  useEffect(() => {
+    setPage(1)
+  }, [filters])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -109,11 +120,14 @@ export function MembersClient({ members, graduations, canEdit }: MembersClientPr
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(member => (
-            <MemberCard key={member.id} member={member} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {paginated.map(member => (
+              <MemberCard key={member.id} member={member} />
+            ))}
+          </div>
+          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
+        </>
       )}
     </div>
   )

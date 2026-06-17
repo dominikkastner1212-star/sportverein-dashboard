@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { createClient, getDocumentSignedUrl, deleteDocument } from '@/lib/supabase/client'
 import {
@@ -11,6 +11,9 @@ import {
 import { cn, formatDate, formatFileSize, isExpiringSoon, isExpired, isPdfFile, isImageFile } from '@/lib/utils'
 import { DOCUMENT_TYPE_LABELS } from '@/types'
 import type { MemberDocument, DocumentType, UserRole } from '@/types'
+import { Pagination } from '@/components/ui/Pagination'
+
+const PAGE_SIZE = 20
 
 const TYPE_ICONS: Record<DocumentType, React.ElementType> = {
   sportlerpass: FileBadge,
@@ -38,6 +41,7 @@ export function DocumentsClient({ documents: initialDocuments, role }: Documents
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [previewDoc, setPreviewDoc] = useState<MemberDocument | null>(null)
+  const [page, setPage] = useState(1)
 
   const canDelete = role === 'admin'
 
@@ -58,6 +62,13 @@ export function DocumentsClient({ documents: initialDocuments, role }: Documents
       return true
     })
   }, [documents, search, typeFilter, statusFilter])
+
+  useEffect(() => {
+    setPage(1)
+  }, [search, typeFilter, statusFilter])
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   const expiredCount = documents.filter(d => d.expires_at && isExpired(d.expires_at)).length
   const expiringCount = documents.filter(d => d.expires_at && !isExpired(d.expires_at) && isExpiringSoon(d.expires_at)).length
@@ -164,7 +175,7 @@ export function DocumentsClient({ documents: initialDocuments, role }: Documents
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map(doc => {
+          {paginated.map(doc => {
             const Icon = TYPE_ICONS[doc.document_type]
             const expired = !!doc.expires_at && isExpired(doc.expires_at)
             const expiringSoon = !!doc.expires_at && !expired && isExpiringSoon(doc.expires_at)
@@ -258,6 +269,8 @@ export function DocumentsClient({ documents: initialDocuments, role }: Documents
           })}
         </div>
       )}
+
+      <Pagination page={page} pageCount={pageCount} onPageChange={setPage} />
 
       {/* Preview modal */}
       {previewUrl && previewDoc && (

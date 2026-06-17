@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { Calendar, FileText, Search, Users, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -118,66 +119,68 @@ export function GlobalSearch() {
         </kbd>
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-[60] flex items-start justify-center bg-ink/60 p-4 pt-[10vh] backdrop-blur-sm animate-fade-in"
-          onClick={() => setOpen(false)}
-        >
+      {open &&
+        createPortal(
           <div
-            className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-modal"
-            onClick={e => e.stopPropagation()}
+            className="fixed inset-0 z-[60] flex items-start justify-center bg-ink/60 p-4 pt-[10vh] backdrop-blur-sm animate-fade-in"
+            onClick={() => setOpen(false)}
           >
-            <div className="flex items-center gap-2 border-b border-surface-3 px-4 py-3">
-              <Search className="h-4 w-4 flex-shrink-0 text-ink-subtle" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Mitglieder, Prüfungen, Dokumente durchsuchen…"
-                className="flex-1 border-none bg-transparent text-sm text-ink outline-none placeholder:text-ink-subtle"
-              />
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="text-ink-subtle hover:text-ink"
-                aria-label="Schließen"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <div
+              className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-modal"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-2 border-b border-surface-3 px-4 py-3">
+                <Search className="h-4 w-4 flex-shrink-0 text-ink-subtle" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Mitglieder, Prüfungen, Dokumente durchsuchen…"
+                  className="flex-1 border-none bg-transparent text-sm text-ink outline-none placeholder:text-ink-subtle"
+                />
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="text-ink-subtle hover:text-ink"
+                  aria-label="Schließen"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto p-2">
+                {loading && <p className="px-3 py-4 text-center text-sm text-ink-subtle">Suche…</p>}
+
+                {!loading && query.trim().length >= 2 && results.length === 0 && (
+                  <p className="px-3 py-4 text-center text-sm text-ink-subtle">Keine Ergebnisse gefunden.</p>
+                )}
+
+                {!loading && query.trim().length < 2 && (
+                  <p className="px-3 py-4 text-center text-sm text-ink-subtle">Mindestens 2 Zeichen eingeben.</p>
+                )}
+
+                {!loading &&
+                  results.map(result => {
+                    const Icon = icons[result.type]
+                    return (
+                      <button
+                        key={`${result.type}-${result.id}`}
+                        type="button"
+                        onClick={() => handleSelect(result)}
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-1"
+                      >
+                        <Icon className="h-4 w-4 flex-shrink-0 text-ink-subtle" />
+                        <span className="flex-1 truncate text-ink">{result.title}</span>
+                        <span className="text-xs text-ink-subtle">{result.subtitle}</span>
+                      </button>
+                    )
+                  })}
+              </div>
             </div>
-
-            <div className="max-h-80 overflow-y-auto p-2">
-              {loading && <p className="px-3 py-4 text-center text-sm text-ink-subtle">Suche…</p>}
-
-              {!loading && query.trim().length >= 2 && results.length === 0 && (
-                <p className="px-3 py-4 text-center text-sm text-ink-subtle">Keine Ergebnisse gefunden.</p>
-              )}
-
-              {!loading && query.trim().length < 2 && (
-                <p className="px-3 py-4 text-center text-sm text-ink-subtle">Mindestens 2 Zeichen eingeben.</p>
-              )}
-
-              {!loading &&
-                results.map(result => {
-                  const Icon = icons[result.type]
-                  return (
-                    <button
-                      key={`${result.type}-${result.id}`}
-                      type="button"
-                      onClick={() => handleSelect(result)}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-surface-1"
-                    >
-                      <Icon className="h-4 w-4 flex-shrink-0 text-ink-subtle" />
-                      <span className="flex-1 truncate text-ink">{result.title}</span>
-                      <span className="text-xs text-ink-subtle">{result.subtitle}</span>
-                    </button>
-                  )
-                })}
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   )
 }

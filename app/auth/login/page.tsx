@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { Shield, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,8 +37,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-ink rounded-xl mb-4">
-            <Shield className="w-6 h-6 text-surface-0" />
+          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-card mb-4 overflow-hidden">
+            <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1.5" />
           </div>
           <h1 className="text-xl font-semibold text-ink">Vereinsverwaltung</h1>
           <p className="text-sm text-ink-muted mt-1">Melde dich an, um fortzufahren</p>

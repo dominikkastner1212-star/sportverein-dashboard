@@ -50,8 +50,8 @@ export function Sidebar({ profile }: SidebarProps) {
     <>
       <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-surface-3 bg-surface-0 px-4 py-3 shadow-card lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
-            <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1" />
+          <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+            <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-0.5" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold leading-tight">
@@ -88,8 +88,8 @@ export function Sidebar({ profile }: SidebarProps) {
       >
         <div className="border-b border-white/10 px-4 py-5">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white">
-              <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1" />
+            <div className="relative flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-sm">
+              <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-0.5" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold leading-tight">

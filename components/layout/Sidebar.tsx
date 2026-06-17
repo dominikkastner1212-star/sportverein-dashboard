@@ -19,6 +19,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types'
+import { GlobalSearch } from '@/components/layout/GlobalSearch'
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Übersicht', icon: LayoutDashboard },
@@ -102,6 +103,10 @@ export function Sidebar({ profile }: SidebarProps) {
         </div>
 
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4">
+          <div className="pb-3">
+            <GlobalSearch />
+          </div>
+
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
 

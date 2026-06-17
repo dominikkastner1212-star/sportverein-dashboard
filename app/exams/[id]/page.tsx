@@ -4,7 +4,7 @@ import { ArrowLeft, Calendar, Clock, Edit, MapPin } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { ExamParticipantsManager } from '@/components/exams/ExamParticipantsManager'
 import { getVisibleGraduations } from '@/lib/graduations'
-import { formatDate, EXAM_STATUS_LABELS, EXAM_STATUS_COLORS, cn } from '@/lib/utils'
+import { formatDate, EXAM_STATUS_LABELS, EXAM_STATUS_COLORS, cn, getGraduationBackground } from '@/lib/utils'
 import type { Exam, ExamStatus, Graduation, Member, UserRole } from '@/types'
 
 type ParticipantMember = { first_name: string; last_name: string }
@@ -134,7 +134,7 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
             <div className="space-y-2">
               {allowedGraduations.map(graduation => (
                 <div key={graduation.id} className="flex items-center gap-2 text-sm text-ink-muted">
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: graduation.border_color }} />
+                  <span className="h-3 w-3 rounded-full" style={{ background: getGraduationBackground(graduation) }} />
                   {graduation.name}
                 </div>
               ))}

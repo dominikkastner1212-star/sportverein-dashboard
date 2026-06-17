@@ -6,7 +6,7 @@ import {
   ArrowLeft, User, Phone, Mail, Calendar, Clock,
   Award, Edit, Users as UsersIcon,
 } from 'lucide-react'
-import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, cn } from '@/lib/utils'
+import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, cn, getGraduationBackground } from '@/lib/utils'
 import { DocumentSection } from '@/components/documents/DocumentSection'
 import { ChecklistSection } from '@/components/checklists/ChecklistSection'
 import type { Member, Graduation, ExamHistory, UserRole } from '@/types'
@@ -33,7 +33,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       .single(),
     supabase
       .from('exam_history')
-      .select('*, graduations(name, border_color)')
+      .select('*, graduations(name, border_color, secondary_color)')
       .eq('member_id', id)
       .order('date', { ascending: false }),
   ])
@@ -58,7 +58,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
         className="card overflow-hidden"
         style={grad ? { borderColor: grad.border_color, borderWidth: '2px' } : undefined}
       >
-        {grad && <div className="h-1.5 w-full" style={{ backgroundColor: grad.border_color }} />}
+        {grad && <div className="h-1.5 w-full" style={{ background: getGraduationBackground(grad) }} />}
 
         <div className="p-6">
           <div className="flex items-start gap-5">
@@ -95,7 +95,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                     </span>
                     {grad && (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: grad.border_color }} />
+                        <div className="w-3 h-3 rounded-full" style={{ background: getGraduationBackground(grad) }} />
                         <span className="text-sm font-medium text-ink-muted">{grad.name}</span>
                       </div>
                     )}
@@ -154,7 +154,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                   <div key={h.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-1">
                     <div
                       className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: h.graduations?.border_color || '#ccc' }}
+                      style={{ background: h.graduations ? getGraduationBackground(h.graduations) : '#ccc' }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-ink">{h.graduations?.name}</p>

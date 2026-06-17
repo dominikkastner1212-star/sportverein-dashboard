@@ -72,6 +72,13 @@ export function getGraduationBorderStyle(graduation?: Graduation | null) {
   }
 }
 
+/** CSS background for a belt dot/bar: solid color, or a 50/50 split for two-tone grades. */
+export function getGraduationBackground(graduation?: Pick<Graduation, 'border_color' | 'secondary_color'> | null): string {
+  if (!graduation) return '#e5e7eb'
+  if (!graduation.secondary_color) return graduation.border_color
+  return `linear-gradient(90deg, ${graduation.border_color} 50%, ${graduation.secondary_color} 50%)`
+}
+
 export function getGraduationColorName(color: string): string {
   const map: Record<string, string> = {
     '#e5e7eb': 'Weiß',

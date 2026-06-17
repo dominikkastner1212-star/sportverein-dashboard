@@ -19,6 +19,7 @@ export interface Graduation {
   name: string
   color: string
   border_color: string
+  secondary_color: string | null
   rank_order: number
   min_age: number | null
   min_training_months: number | null

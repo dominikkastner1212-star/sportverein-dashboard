@@ -43,7 +43,7 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     supabase.from('members').select('*', { count: 'exact', head: true }),
     supabase.from('members').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-    supabase.from('members').select('id, status, gender, graduation_id, birth_date, graduations(name, color, border_color, rank_order)'),
+    supabase.from('members').select('id, status, gender, graduation_id, birth_date, graduations(name, color, border_color, secondary_color, rank_order)'),
     supabase
       .from('exams')
       .select('*, profiles(full_name)')
@@ -96,22 +96,26 @@ export default async function DashboardPage() {
           value={activeMembers || 0}
           icon={Users}
           trend={{ value: `von ${totalMembers || 0} gesamt`, positive: false }}
+          accent="bg-brand-blue/10 text-brand-blue"
         />
         <StatCard
           label="Kommende Prüfungen"
           value={upcomingExams?.length || 0}
           icon={Calendar}
+          accent="bg-brand-gold/15 text-brand-gold-dark"
         />
         <StatCard
           label="Alter (Ø)"
           value={`${avgAge} J.`}
           icon={Award}
+          accent="bg-brand-navy/10 text-brand-navy"
         />
         <StatCard
           label="Offene Aktionen"
           value={openActions.length}
           icon={ListChecks}
           trend={openActions.length > 0 ? { value: 'Achtung erforderlich', positive: false } : undefined}
+          accent="bg-accent-light text-accent-dark"
         />
       </div>
 

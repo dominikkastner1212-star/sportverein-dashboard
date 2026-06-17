@@ -28,9 +28,9 @@ export function StatCard({ label, value, icon: Icon, trend, accent, className }:
         </div>
         <div className={cn(
           'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0',
-          accent || 'bg-surface-2'
+          accent || 'bg-surface-2 text-ink-muted'
         )}>
-          <Icon className="w-5 h-5 text-ink-muted" />
+          <Icon className="w-5 h-5" />
         </div>
       </div>
     </div>

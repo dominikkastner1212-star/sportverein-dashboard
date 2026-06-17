@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getGraduationBackground } from '@/lib/utils'
 import type { Database } from '@/lib/supabase/database.types'
 import type { Exam, ExamStatus, Graduation } from '@/types'
 
@@ -167,7 +168,7 @@ export function ExamForm({ graduations, examinerId, exam }: ExamFormProps) {
                     checked={form.allowed_graduation_ids.includes(graduation.id)}
                     onChange={() => toggleGraduation(graduation.id)}
                   />
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: graduation.border_color }} />
+                  <span className="h-3 w-3 rounded-full" style={{ background: getGraduationBackground(graduation) }} />
                   <span>{graduation.name}</span>
                 </label>
               ))}

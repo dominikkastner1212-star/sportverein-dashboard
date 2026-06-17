@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS } from '@/lib/utils'
+import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, getGraduationBackground } from '@/lib/utils'
 import type { Member, Graduation, MemberStatus } from '@/types'
 import { User } from 'lucide-react'
 
@@ -28,8 +28,8 @@ export function MemberCard({ member }: MemberCardProps) {
         {/* Top bar with belt color accent */}
         {grad && (
           <div
-            className="h-1 w-full"
-            style={{ backgroundColor: grad.border_color }}
+            className="h-1.5 w-full"
+            style={{ background: getGraduationBackground(grad) }}
           />
         )}
 
@@ -76,7 +76,7 @@ export function MemberCard({ member }: MemberCardProps) {
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <div
                     className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: grad.border_color }}
+                    style={{ background: getGraduationBackground(grad) }}
                   />
                   <span className="text-xs font-medium text-ink-muted">{grad.name}</span>
                 </div>

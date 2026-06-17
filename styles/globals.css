@@ -18,16 +18,16 @@
     @apply bg-surface-1 text-ink font-sans;
     font-feature-settings: 'cv11', 'ss01', 'ss03';
     background:
-      linear-gradient(180deg, rgba(215, 25, 32, 0.05), rgba(215, 25, 32, 0) 220px),
+      linear-gradient(180deg, rgba(40, 80, 158, 0.07), rgba(217, 168, 40, 0.04) 140px, rgba(217, 168, 40, 0) 260px),
       #f7f7f5;
   }
 
   ::selection {
-    @apply bg-accent-light text-accent-dark;
+    @apply bg-brand-blue/15 text-brand-blue-dark;
   }
 
   :focus-visible {
-    @apply outline-2 outline-accent outline-offset-2;
+    @apply outline-2 outline-brand-blue outline-offset-2;
   }
 
   /* Scrollbar styling */
@@ -53,14 +53,14 @@
   }
 
   .card-hover {
-    @apply card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
+    @apply card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 hover:border-brand-blue/20;
   }
 
   /* Inputs */
   .input {
     @apply w-full px-3 py-2 bg-surface-0 border border-surface-3 rounded-lg text-sm text-ink
            placeholder:text-ink-subtle
-           focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent
+           focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue
            transition-all duration-150;
   }
 
@@ -76,7 +76,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-accent text-white hover:bg-accent-dark focus:ring-accent/30;
+    @apply btn bg-brand-blue text-white shadow-sm hover:bg-brand-blue-dark focus:ring-brand-blue/30;
   }
 
   .btn-secondary {
@@ -84,7 +84,7 @@
   }
 
   .btn-accent {
-    @apply btn bg-accent text-white hover:bg-accent-dark focus:ring-accent/30;
+    @apply btn bg-brand-gold text-ink shadow-sm hover:bg-brand-gold-dark hover:text-white focus:ring-brand-gold/30;
   }
 
   .btn-danger {
@@ -116,7 +116,7 @@
   }
 
   .nav-item-active {
-    @apply nav-item text-white bg-accent font-medium;
+    @apply nav-item text-white bg-brand-blue shadow-sm font-medium;
   }
 
   /* Member card belt border */

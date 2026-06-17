@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { cn, MEMBER_GROUP_LABELS } from '@/lib/utils'
+import { cn, MEMBER_GROUP_LABELS, getGraduationBackground } from '@/lib/utils'
 import {
   getAssignmentScopeLabel,
   getEffectiveTemplateUsage,
@@ -645,7 +645,7 @@ export default function ChecklistsPage() {
                                             : 'border-surface-3 bg-surface-0 text-ink-muted'
                                         )}
                                       >
-                                        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: graduation.border_color }} />
+                                        <span className="h-3 w-3 rounded-full" style={{ background: getGraduationBackground(graduation) }} />
                                         <span className="truncate">{graduation.name}</span>
                                       </button>
                                     )

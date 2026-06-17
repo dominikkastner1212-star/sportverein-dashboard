@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { getGraduationBackground } from '@/lib/utils'
 import type { Database } from '@/lib/supabase/database.types'
 import type { Graduation, Member, MemberGender, MemberGroup, MemberStatus } from '@/types'
 
@@ -218,8 +219,8 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
                 {currentGraduation && (
                   <div className="flex items-center gap-2 mt-3 text-xs text-ink-muted">
                     <span
-                      className="h-3 w-3 rounded-full border"
-                      style={{ backgroundColor: currentGraduation.color, borderColor: currentGraduation.border_color }}
+                      className="h-3 w-3 rounded-full"
+                      style={{ background: getGraduationBackground(currentGraduation) }}
                     />
                     Rang {currentGraduation.rank_order}
                   </div>
@@ -234,8 +235,8 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <span
-                        className="h-4 w-4 rounded-full border"
-                        style={{ backgroundColor: nextGraduation.color, borderColor: nextGraduation.border_color }}
+                        className="h-4 w-4 rounded-full"
+                        style={{ background: getGraduationBackground(nextGraduation) }}
                       />
                       <span className="text-sm font-medium text-ink">{nextGraduation.name}</span>
                     </div>

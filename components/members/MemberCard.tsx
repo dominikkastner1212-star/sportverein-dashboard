@@ -18,20 +18,12 @@ export function MemberCard({ member }: MemberCardProps) {
 
   return (
     <Link href={`/members/${member.id}`}>
-      <div
-        className="card-hover cursor-pointer overflow-hidden"
-        style={{
-          borderColor: grad?.border_color || '#e8e8e6',
-          borderWidth: grad ? '2px' : '1px',
-        }}
-      >
+      <div className="card-hover cursor-pointer overflow-hidden">
         {/* Top bar with belt color accent */}
-        {grad && (
-          <div
-            className="h-1.5 w-full"
-            style={{ background: getGraduationBackground(grad) }}
-          />
-        )}
+        <div
+          className="h-1.5 w-full"
+          style={{ background: grad ? getGraduationBackground(grad) : '#e8e8e6' }}
+        />
 
         <div className="p-4">
           <div className="flex items-start gap-3">
@@ -39,7 +31,7 @@ export function MemberCard({ member }: MemberCardProps) {
             <div className="relative flex-shrink-0">
               <div
                 className="w-12 h-12 rounded-full overflow-hidden bg-surface-2 flex items-center justify-center"
-                style={grad ? { boxShadow: `0 0 0 2px ${grad.border_color}30` } : undefined}
+                style={{ boxShadow: '0 0 0 2px rgba(0,0,0,0.06)' }}
               >
                 {avatarUrl ? (
                   <Image
@@ -75,7 +67,7 @@ export function MemberCard({ member }: MemberCardProps) {
               {grad && (
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <div
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                    className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10"
                     style={{ background: getGraduationBackground(grad) }}
                   />
                   <span className="text-xs font-medium text-ink-muted">{grad.name}</span>

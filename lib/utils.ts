@@ -76,7 +76,7 @@ export function getGraduationBorderStyle(graduation?: Graduation | null) {
 export function getGraduationBackground(graduation?: Pick<Graduation, 'border_color' | 'secondary_color'> | null): string {
   if (!graduation) return '#e5e7eb'
   if (!graduation.secondary_color) return graduation.border_color
-  return `linear-gradient(90deg, ${graduation.border_color} 50%, ${graduation.secondary_color} 50%)`
+  return `linear-gradient(135deg, ${graduation.border_color} 50%, ${graduation.secondary_color} 50%)`
 }
 
 export function getGraduationColorName(color: string): string {

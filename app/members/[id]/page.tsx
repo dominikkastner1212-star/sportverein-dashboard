@@ -54,11 +54,8 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
       </Link>
 
       {/* Hero card */}
-      <div
-        className="card overflow-hidden"
-        style={grad ? { borderColor: grad.border_color, borderWidth: '2px' } : undefined}
-      >
-        {grad && <div className="h-1.5 w-full" style={{ background: getGraduationBackground(grad) }} />}
+      <div className="card overflow-hidden">
+        <div className="h-2 w-full" style={{ background: grad ? getGraduationBackground(grad) : '#e8e8e6' }} />
 
         <div className="p-6">
           <div className="flex items-start gap-5">
@@ -66,7 +63,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
             <div className="flex-shrink-0">
               <div
                 className="w-20 h-20 rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center"
-                style={grad ? { boxShadow: `0 0 0 3px ${grad.border_color}40` } : undefined}
+                style={{ boxShadow: '0 0 0 3px rgba(0,0,0,0.06)' }}
               >
                 {m.avatar_url ? (
                   <Image
@@ -95,7 +92,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                     </span>
                     {grad && (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded-full" style={{ background: getGraduationBackground(grad) }} />
+                        <div className="w-3.5 h-3.5 rounded-full shadow-sm ring-1 ring-black/10" style={{ background: getGraduationBackground(grad) }} />
                         <span className="text-sm font-medium text-ink-muted">{grad.name}</span>
                       </div>
                     )}
@@ -153,7 +150,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                 {(history as (ExamHistory & { graduations: Graduation })[]).map(h => (
                   <div key={h.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-1">
                     <div
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10"
                       style={{ background: h.graduations ? getGraduationBackground(h.graduations) : '#ccc' }}
                     />
                     <div className="flex-1 min-w-0">

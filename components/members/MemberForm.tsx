@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Loader2, Save } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { ArrowLeft, Loader2, Save, User, Upload, X } from 'lucide-react'
+import { createClient, uploadAvatar } from '@/lib/supabase/client'
 import { BeltSwatch } from '@/components/ui/BeltSwatch'
 import type { Database } from '@/lib/supabase/database.types'
 import type { Graduation, Member, MemberGender, MemberGroup, MemberStatus } from '@/types'
@@ -24,6 +25,10 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
   const isEditing = Boolean(member)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(member?.avatar_url || null)
+  const [avatarRemoved, setAvatarRemoved] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     first_name: member?.first_name || '',
     last_name: member?.last_name || '',
@@ -52,6 +57,19 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
+  function handleAvatarSelect(file: File | undefined) {
+    if (!file) return
+    setAvatarFile(file)
+    setAvatarRemoved(false)
+    setAvatarPreview(URL.createObjectURL(file))
+  }
+
+  function handleAvatarRemove() {
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    setAvatarRemoved(true)
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
@@ -67,7 +85,7 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
       group_type: form.group_type,
       graduation_id: form.graduation_id || null,
       last_exam_date: form.last_exam_date || null,
-      avatar_url: null,
+      avatar_url: avatarRemoved ? null : member?.avatar_url || null,
       notes: form.notes.trim() || null,
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,
@@ -85,6 +103,17 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
       setError(saveError?.message || 'Mitglied konnte nicht gespeichert werden.')
       setSubmitting(false)
       return
+    }
+
+    if (avatarFile) {
+      try {
+        const avatarUrl = await uploadAvatar(supabase, data.id, avatarFile)
+        await supabase.from('members').update({ avatar_url: avatarUrl }).eq('id', data.id)
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Profilbild konnte nicht hochgeladen werden.')
+        setSubmitting(false)
+        return
+      }
     }
 
     router.push(`/members/${data.id}`)
@@ -106,6 +135,41 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-6 max-w-4xl">
+        <div>
+          <label className="input-label">Profilbild</label>
+          <div className="flex items-center gap-4">
+            <div
+              className="w-20 h-20 rounded-2xl overflow-hidden bg-surface-2 flex items-center justify-center flex-shrink-0"
+              style={{ boxShadow: '0 0 0 3px rgba(0,0,0,0.06)' }}
+            >
+              {avatarPreview ? (
+                <Image src={avatarPreview} alt="Profilbild" width={80} height={80} unoptimized={!!avatarFile} className="object-cover w-full h-full" />
+              ) : (
+                <User className="w-9 h-9 text-ink-faint" />
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={event => handleAvatarSelect(event.target.files?.[0])}
+              />
+              <button type="button" className="btn-secondary btn-sm" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-3.5 h-3.5" />
+                Bild auswählen
+              </button>
+              {avatarPreview && (
+                <button type="button" className="btn-ghost btn-sm" onClick={handleAvatarRemove}>
+                  <X className="w-3.5 h-3.5" />
+                  Entfernen
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="input-label">Vorname</label>

@@ -46,6 +46,22 @@ export async function uploadDocument(
   return path
 }
 
+export async function uploadAvatar(
+  supabase: ReturnType<typeof createClient>,
+  memberId: string,
+  file: File
+) {
+  const ext = file.name.split('.').pop() || 'jpg'
+  const path = `members/${memberId}/avatar-${Date.now()}.${ext}`
+
+  const { error } = await supabase.storage
+    .from(STORAGE_BUCKETS.AVATARS)
+    .upload(path, file, { upsert: false })
+
+  if (error) throw error
+  return getAvatarUrl(supabase, path)
+}
+
 export async function deleteDocument(
   supabase: ReturnType<typeof createClient>,
   path: string

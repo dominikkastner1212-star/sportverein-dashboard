@@ -9,7 +9,7 @@ import type { Member, Graduation, FilterState } from '@/types'
 import Link from 'next/link'
 
 interface MembersClientProps {
-  members: (Member & { graduation?: Graduation })[]
+  members: (Member & { graduation?: Graduation; checklistProgress?: { done: number; total: number } | null })[]
   graduations: Graduation[]
   canEdit: boolean
 }

@@ -5,7 +5,7 @@ import type { Member, Graduation, MemberStatus } from '@/types'
 import { User } from 'lucide-react'
 
 interface MemberCardProps {
-  member: Member & { graduation?: Graduation }
+  member: Member & { graduation?: Graduation; checklistProgress?: { done: number; total: number } | null }
 }
 
 export function MemberCard({ member }: MemberCardProps) {
@@ -13,6 +13,8 @@ export function MemberCard({ member }: MemberCardProps) {
   const grad = member.graduation
 
   const avatarUrl = member.avatar_url
+  const progress = member.checklistProgress
+  const progressPct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : null
 
   return (
     <Link href={`/members/${member.id}`}>
@@ -81,6 +83,26 @@ export function MemberCard({ member }: MemberCardProps) {
               )}
             </div>
           </div>
+
+          {progressPct !== null && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] font-medium text-ink-subtle">Checkliste</span>
+                <span className="text-[10px] font-medium text-ink-subtle tabular-nums">
+                  {progress!.done}/{progress!.total}
+                </span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-surface-2 overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-all duration-500',
+                    progressPct === 100 ? 'bg-green-500' : 'bg-brand-gold'
+                  )}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-2">

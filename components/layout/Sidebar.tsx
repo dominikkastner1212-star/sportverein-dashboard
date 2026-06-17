@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Calendar,
@@ -11,7 +12,6 @@ import {
   LogOut,
   Menu,
   Settings,
-  Shield,
   Users,
   X,
 } from 'lucide-react'
@@ -48,8 +48,8 @@ export function Sidebar({ profile }: SidebarProps) {
     <>
       <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-surface-3 bg-surface-0 px-4 py-3 shadow-card lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-blue text-white">
-            <Shield className="h-4 w-4 text-brand-gold" />
+          <div className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white">
+            <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1" />
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold leading-tight">
@@ -86,8 +86,8 @@ export function Sidebar({ profile }: SidebarProps) {
       >
         <div className="border-b border-white/10 px-4 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10">
-              <Shield className="h-4 w-4 text-brand-gold" />
+            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white">
+              <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1" />
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold leading-tight">

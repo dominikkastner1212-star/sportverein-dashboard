@@ -1,15 +1,10 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Shield, User } from 'lucide-react'
+import { Shield } from 'lucide-react'
 import { getVisibleGraduations } from '@/lib/graduations'
 import { BeltSwatch } from '@/components/ui/BeltSwatch'
-import type { Graduation } from '@/types'
-
-const ROLE_LABELS = {
-  admin: { label: 'Administrator', color: 'bg-red-50 text-red-700 border-red-200' },
-  trainer: { label: 'Trainer', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-  reader: { label: 'Leser', color: 'bg-gray-50 text-gray-600 border-gray-200' },
-}
+import { UserManagement } from '@/components/settings/UserManagement'
+import type { Graduation, Profile } from '@/types'
 
 export default async function SettingsPage() {
   const supabase = createServerClient()
@@ -45,36 +40,7 @@ export default async function SettingsPage() {
       </div>
 
       {/* User Management */}
-      <div className="card">
-        <div className="px-6 py-4 border-b border-surface-3">
-          <h2 className="section-title">Nutzerverwaltung</h2>
-          <p className="section-subtitle mt-0.5">Rollen und Zugriffsrechte</p>
-        </div>
-        <div className="divide-y divide-surface-3">
-          {(profiles || []).map(p => (
-            <div key={p.id} className="flex items-center gap-4 px-6 py-4">
-              <div className="w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0">
-                <User className="w-4 h-4 text-ink-muted" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink">{p.full_name || '—'}</p>
-                <p className="text-xs text-ink-subtle truncate">{p.email}</p>
-              </div>
-              <span className={`badge text-xs ${ROLE_LABELS[p.role as keyof typeof ROLE_LABELS]?.color}`}>
-                {ROLE_LABELS[p.role as keyof typeof ROLE_LABELS]?.label}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="px-6 py-3 border-t border-surface-3">
-          <p className="text-xs text-ink-subtle">
-            Um Rollen zu ändern, nutze den Supabase SQL Editor:{' '}
-            <code className="font-mono bg-surface-2 px-1 rounded text-[11px]">
-              UPDATE profiles SET role = 'trainer' WHERE email = '…'
-            </code>
-          </p>
-        </div>
-      </div>
+      <UserManagement profiles={(profiles || []) as Profile[]} currentUserId={session?.user.id || ''} />
 
       {/* Graduations */}
       <div className="card">

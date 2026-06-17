@@ -14,6 +14,7 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>
+        Relationships: []
       }
       members: {
         Row: {
@@ -38,6 +39,9 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['members']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['members']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'members_graduation_id_fkey'; columns: ['graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] }
+        ]
       }
       graduations: {
         Row: {
@@ -52,6 +56,7 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['graduations']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['graduations']['Insert']>
+        Relationships: []
       }
       exams: {
         Row: {
@@ -69,6 +74,9 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['exams']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['exams']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'exams_examiner_id_fkey'; columns: ['examiner_id']; isOneToOne: false; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
       }
       exam_participants: {
         Row: {
@@ -82,6 +90,11 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['exam_participants']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['exam_participants']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'exam_participants_exam_id_fkey'; columns: ['exam_id']; isOneToOne: false; referencedRelation: 'exams'; referencedColumns: ['id'] },
+          { foreignKeyName: 'exam_participants_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
+          { foreignKeyName: 'exam_participants_target_graduation_id_fkey'; columns: ['target_graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] }
+        ]
       }
       exam_history: {
         Row: {
@@ -97,6 +110,11 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['exam_history']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['exam_history']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'exam_history_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
+          { foreignKeyName: 'exam_history_exam_id_fkey'; columns: ['exam_id']; isOneToOne: false; referencedRelation: 'exams'; referencedColumns: ['id'] },
+          { foreignKeyName: 'exam_history_graduation_id_fkey'; columns: ['graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] }
+        ]
       }
       checklist_templates: {
         Row: {
@@ -113,6 +131,10 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['checklist_templates']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['checklist_templates']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'checklist_templates_graduation_id_fkey'; columns: ['graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] },
+          { foreignKeyName: 'checklist_templates_created_by_fkey'; columns: ['created_by']; isOneToOne: false; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
       }
       checklist_assignments: {
         Row: {
@@ -129,6 +151,9 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['checklist_assignments']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['checklist_assignments']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'checklist_assignments_template_id_fkey'; columns: ['template_id']; isOneToOne: false; referencedRelation: 'checklist_templates'; referencedColumns: ['id'] }
+        ]
       }
       checklist_items: {
         Row: {
@@ -142,6 +167,9 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['checklist_items']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['checklist_items']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'checklist_items_template_id_fkey'; columns: ['template_id']; isOneToOne: false; referencedRelation: 'checklist_templates'; referencedColumns: ['id'] }
+        ]
       }
       member_checklist_status: {
         Row: {
@@ -158,6 +186,12 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['member_checklist_status']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['member_checklist_status']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'member_checklist_status_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
+          { foreignKeyName: 'member_checklist_status_exam_id_fkey'; columns: ['exam_id']; isOneToOne: false; referencedRelation: 'exams'; referencedColumns: ['id'] },
+          { foreignKeyName: 'member_checklist_status_checklist_item_id_fkey'; columns: ['checklist_item_id']; isOneToOne: false; referencedRelation: 'checklist_items'; referencedColumns: ['id'] },
+          { foreignKeyName: 'member_checklist_status_done_by_fkey'; columns: ['done_by']; isOneToOne: false; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
       }
       member_documents: {
         Row: {
@@ -175,7 +209,15 @@ export type Database = {
         }
         Insert: Omit<Database['public']['Tables']['member_documents']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['member_documents']['Insert']>
+        Relationships: [
+          { foreignKeyName: 'member_documents_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
+          { foreignKeyName: 'member_documents_uploaded_by_fkey'; columns: ['uploaded_by']; isOneToOne: false; referencedRelation: 'profiles'; referencedColumns: ['id'] }
+        ]
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }

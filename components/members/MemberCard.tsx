@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, getGraduationBackground } from '@/lib/utils'
+import { cn, calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS } from '@/lib/utils'
+import { BeltSwatch } from '@/components/ui/BeltSwatch'
 import type { Member, Graduation, MemberStatus } from '@/types'
 import { User } from 'lucide-react'
 
@@ -20,10 +21,7 @@ export function MemberCard({ member }: MemberCardProps) {
     <Link href={`/members/${member.id}`}>
       <div className="card-hover cursor-pointer overflow-hidden">
         {/* Top bar with belt color accent */}
-        <div
-          className="h-1.5 w-full"
-          style={{ background: grad ? getGraduationBackground(grad) : '#e8e8e6' }}
-        />
+        <BeltSwatch graduation={grad} className="h-1.5 w-full" />
 
         <div className="p-4">
           <div className="flex items-start gap-3">
@@ -66,10 +64,7 @@ export function MemberCard({ member }: MemberCardProps) {
               </p>
               {grad && (
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  <div
-                    className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10"
-                    style={{ background: getGraduationBackground(grad) }}
-                  />
+                  <BeltSwatch graduation={grad} className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10" />
                   <span className="text-xs font-medium text-ink-muted">{grad.name}</span>
                 </div>
               )}

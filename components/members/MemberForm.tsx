@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { getGraduationBackground } from '@/lib/utils'
+import { BeltSwatch } from '@/components/ui/BeltSwatch'
 import type { Database } from '@/lib/supabase/database.types'
 import type { Graduation, Member, MemberGender, MemberGroup, MemberStatus } from '@/types'
 
@@ -218,10 +218,7 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
                 </select>
                 {currentGraduation && (
                   <div className="flex items-center gap-2 mt-3 text-xs text-ink-muted">
-                    <span
-                      className="h-3 w-3 rounded-full"
-                      style={{ background: getGraduationBackground(currentGraduation) }}
-                    />
+                    <BeltSwatch graduation={currentGraduation} className="h-3 w-3 rounded-full" />
                     Rang {currentGraduation.rank_order}
                   </div>
                 )}
@@ -234,10 +231,7 @@ export function MemberForm({ graduations, member }: MemberFormProps) {
                 {nextGraduation ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span
-                        className="h-4 w-4 rounded-full"
-                        style={{ background: getGraduationBackground(nextGraduation) }}
-                      />
+                      <BeltSwatch graduation={nextGraduation} className="h-4 w-4 rounded-full" />
                       <span className="text-sm font-medium text-ink">{nextGraduation.name}</span>
                     </div>
                     {miniKupLevel && (

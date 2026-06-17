@@ -2,7 +2,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Shield, User } from 'lucide-react'
 import { getVisibleGraduations } from '@/lib/graduations'
-import { getGraduationBackground } from '@/lib/utils'
+import { BeltSwatch } from '@/components/ui/BeltSwatch'
 import type { Graduation } from '@/types'
 
 const ROLE_LABELS = {
@@ -85,10 +85,7 @@ export default async function SettingsPage() {
         <div className="divide-y divide-surface-3">
           {visibleGraduations.map(g => (
             <div key={g.id} className="flex items-center gap-4 px-6 py-3.5">
-              <div
-                className="w-6 h-6 rounded-full flex-shrink-0 shadow-sm"
-                style={{ background: getGraduationBackground(g) }}
-              />
+              <BeltSwatch graduation={g} className="w-6 h-6 rounded-full flex-shrink-0 shadow-sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-ink">{g.name}</p>
                 <p className="text-xs text-ink-subtle">Rang {g.rank_order}</p>

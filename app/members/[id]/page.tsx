@@ -6,7 +6,8 @@ import {
   ArrowLeft, User, Phone, Mail, Calendar, Clock,
   Award, Edit, Users as UsersIcon,
 } from 'lucide-react'
-import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, cn, getGraduationBackground } from '@/lib/utils'
+import { calculateAge, formatDate, STATUS_LABELS, STATUS_COLORS, GENDER_LABELS, MEMBER_GROUP_LABELS, cn } from '@/lib/utils'
+import { BeltSwatch } from '@/components/ui/BeltSwatch'
 import { DocumentSection } from '@/components/documents/DocumentSection'
 import { ChecklistSection } from '@/components/checklists/ChecklistSection'
 import type { Member, Graduation, ExamHistory, UserRole } from '@/types'
@@ -55,7 +56,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
 
       {/* Hero card */}
       <div className="card overflow-hidden">
-        <div className="h-2 w-full" style={{ background: grad ? getGraduationBackground(grad) : '#e8e8e6' }} />
+        <BeltSwatch graduation={grad} className="h-2 w-full" />
 
         <div className="p-6">
           <div className="flex items-start gap-5">
@@ -92,7 +93,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                     </span>
                     {grad && (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3.5 h-3.5 rounded-full shadow-sm ring-1 ring-black/10" style={{ background: getGraduationBackground(grad) }} />
+                        <BeltSwatch graduation={grad} className="w-3.5 h-3.5 rounded-full shadow-sm ring-1 ring-black/10" />
                         <span className="text-sm font-medium text-ink-muted">{grad.name}</span>
                       </div>
                     )}
@@ -149,10 +150,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
               <div className="space-y-2">
                 {(history as (ExamHistory & { graduations: Graduation })[]).map(h => (
                   <div key={h.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-1">
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10"
-                      style={{ background: h.graduations ? getGraduationBackground(h.graduations) : '#ccc' }}
-                    />
+                    <BeltSwatch graduation={h.graduations} className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm ring-1 ring-black/10" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-ink">{h.graduations?.name}</p>
                       <p className="text-[11px] text-ink-subtle">{formatDate(h.date)}</p>

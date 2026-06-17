@@ -31,6 +31,13 @@ module.exports = {
           light: '#fde8e9',
           dark: '#a90f16',
         },
+        brand: {
+          gold: '#d9a828',
+          'gold-dark': '#b88a17',
+          blue: '#28509e',
+          'blue-dark': '#1a3568',
+          navy: '#15294a',
+        },
         belt: {
           white: '#e5e7eb',
           yellow: '#eab308',

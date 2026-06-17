@@ -48,11 +48,14 @@ export function Sidebar({ profile }: SidebarProps) {
     <>
       <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between border-b border-surface-3 bg-surface-0 px-4 py-3 shadow-card lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-white">
-            <Shield className="h-4 w-4" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-blue text-white">
+            <Shield className="h-4 w-4 text-brand-gold" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-ink">Taekwon-Do Kaufungen</p>
+            <p className="truncate text-sm font-semibold leading-tight">
+              <span className="text-brand-gold">Taekwon-Do</span>{' '}
+              <span className="text-brand-blue">Team Kaufungen</span>
+            </p>
             <p className="truncate text-xs text-ink-subtle">Mitglieder Dashboard</p>
           </div>
         </div>
@@ -77,17 +80,20 @@ export function Sidebar({ profile }: SidebarProps) {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-[86vw] max-w-[320px] flex-col border-r border-ink-3 bg-ink text-white transition-transform duration-200 lg:w-60 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 flex w-[86vw] max-w-[320px] flex-col border-r border-white/10 bg-brand-navy text-white transition-transform duration-200 lg:w-60 lg:translate-x-0',
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         <div className="border-b border-white/10 px-4 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-accent">
-              <Shield className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/10">
+              <Shield className="h-4 w-4 text-brand-gold" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">Taekwon-Do Kaufungen</p>
+              <p className="truncate text-sm font-semibold leading-tight">
+                <span className="text-brand-gold">Taekwon-Do</span>{' '}
+                <span className="text-white">Team Kaufungen</span>
+              </p>
               <p className="truncate text-xs text-white/50">Mitglieder Dashboard</p>
             </div>
           </div>

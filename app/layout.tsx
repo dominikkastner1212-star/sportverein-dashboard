@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'Taekwon-Do Kaufungen Dashboard',
+  title: 'Taekwon-Do Team Kaufungen Dashboard',
   description: 'Dashboard fuer Mitglieder und Pruefungsverwaltung',
 }
 

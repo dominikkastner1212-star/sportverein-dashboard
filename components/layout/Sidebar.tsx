@@ -8,6 +8,7 @@ import {
   Calendar,
   ChevronRight,
   ClipboardList,
+  FileText,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { href: '/dashboard', label: 'Übersicht', icon: LayoutDashboard },
   { href: '/members', label: 'Mitglieder', icon: Users },
   { href: '/exams', label: 'Prüfungen', icon: Calendar },
+  { href: '/documents', label: 'Dokumente', icon: FileText },
   { href: '/checklists', label: 'Checklisten verwalten', icon: ClipboardList },
 ]
 

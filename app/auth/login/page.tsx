@@ -38,7 +38,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-card mb-4 overflow-hidden">
+          <div className="relative inline-flex items-center justify-center w-28 h-28 bg-white rounded-2xl shadow-card mb-4 overflow-hidden">
             <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1.5" />
           </div>
           <h1 className="text-xl font-semibold text-ink">Vereinsverwaltung</h1>

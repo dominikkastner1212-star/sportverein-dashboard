@@ -1,31 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const router = useRouter()
   const supabase = createClient()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setReady(Boolean(session))
+      if (!session) {
+        setError('Der Link ist ungültig oder abgelaufen. Bitte fordere einen neuen an.')
+      }
+    })
+  }, [supabase])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    if (password.length < 8) {
+      setError('Das Passwort muss mindestens 8 Zeichen lang sein.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('Die Passwörter stimmen nicht überein.')
+      return
+    }
+
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.updateUser({ password })
+
+    setLoading(false)
 
     if (error) {
-      setError('E-Mail oder Passwort ist falsch.')
-      setLoading(false)
+      setError('Passwort konnte nicht geändert werden. Bitte versuche es erneut.')
       return
     }
 
@@ -36,32 +56,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-surface-1 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="relative inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-card mb-4 overflow-hidden">
             <Image src="/logo.png" alt="Vereinslogo" fill className="object-contain p-1.5" />
           </div>
-          <h1 className="text-xl font-semibold text-ink">Vereinsverwaltung</h1>
-          <p className="text-sm text-ink-muted mt-1">Melde dich an, um fortzufahren</p>
+          <h1 className="text-xl font-semibold text-ink">Neues Passwort festlegen</h1>
         </div>
 
-        {/* Card */}
         <div className="card p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="input-label">E-Mail</label>
-              <input
-                type="email"
-                className="input"
-                placeholder="name@verein.de"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
-            <div>
-              <label className="input-label">Passwort</label>
+              <label className="input-label">Neues Passwort</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -70,7 +75,9 @@ export default function LoginPage() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
+                  minLength={8}
+                  disabled={!ready}
+                  autoComplete="new-password"
                 />
                 <button
                   type="button"
@@ -80,11 +87,21 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <div className="text-right mt-1.5">
-                <Link href="/auth/forgot-password" className="text-xs text-ink-subtle hover:text-ink transition-colors">
-                  Passwort vergessen?
-                </Link>
-              </div>
+            </div>
+
+            <div>
+              <label className="input-label">Passwort bestätigen</label>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="input"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                required
+                minLength={8}
+                disabled={!ready}
+                autoComplete="new-password"
+              />
             </div>
 
             {error && (
@@ -93,19 +110,11 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              className="btn-primary w-full justify-center"
-              disabled={loading}
-            >
-              {loading ? 'Anmelden…' : 'Anmelden'}
+            <button type="submit" className="btn-primary w-full justify-center" disabled={loading || !ready}>
+              {loading ? 'Wird gespeichert…' : 'Passwort speichern'}
             </button>
           </form>
         </div>
-
-        <p className="text-center text-xs text-ink-subtle mt-6">
-          Noch kein Zugang? Wende dich an den Administrator.
-        </p>
       </div>
     </div>
   )

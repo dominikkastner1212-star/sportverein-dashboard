@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CheckCircle2, Loader2, Plus, RotateCcw, Trash2, Users, XCircle } from 'lucide-react'
+import { CheckCircle2, ChevronDown, Loader2, Plus, RotateCcw, Trash2, Users, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ChecklistSection } from '@/components/checklists/ChecklistSection'
@@ -44,6 +44,7 @@ export function ExamParticipantsManager({
   const [updatingId, setUpdatingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [checklistReadyByParticipant, setChecklistReadyByParticipant] = useState<Record<string, boolean>>({})
+  const [expandedParticipantIds, setExpandedParticipantIds] = useState<Record<string, boolean>>({})
 
   const participantMemberIds = useMemo(
     () => new Set(participants.map(participant => participant.member_id)),
@@ -119,6 +120,10 @@ export function ExamParticipantsManager({
     setChecklistReadyByParticipant(prev => (
       prev[participantId] === isReady ? prev : { ...prev, [participantId]: isReady }
     ))
+  }
+
+  function toggleExpanded(participantId: string) {
+    setExpandedParticipantIds(prev => ({ ...prev, [participantId]: !prev[participantId] }))
   }
 
   async function setParticipantResult(participant: ExamParticipantView, passed: boolean | null) {
@@ -339,13 +344,27 @@ export function ExamParticipantsManager({
                 </div>
 
                 <div className="mt-3 border-t border-surface-3 pt-3">
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-muted">Aufgaben</p>
-                  <ChecklistSection
-                    memberId={participant.member_id}
-                    examId={examId}
-                    role={role}
-                    onReadyChange={isReady => updateChecklistReady(participant.id, isReady)}
-                  />
+                  <button
+                    type="button"
+                    onClick={() => toggleExpanded(participant.id)}
+                    className="flex w-full items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-muted"
+                  >
+                    <span>Aufgaben</span>
+                    <ChevronDown
+                      className={cn(
+                        'w-4 h-4 transition-transform',
+                        expandedParticipantIds[participant.id] && 'rotate-180'
+                      )}
+                    />
+                  </button>
+                  <div className={cn('mt-2', expandedParticipantIds[participant.id] ? 'block' : 'hidden')}>
+                    <ChecklistSection
+                      memberId={participant.member_id}
+                      examId={examId}
+                      role={role}
+                      onReadyChange={isReady => updateChecklistReady(participant.id, isReady)}
+                    />
+                  </div>
                 </div>
               </div>
             )

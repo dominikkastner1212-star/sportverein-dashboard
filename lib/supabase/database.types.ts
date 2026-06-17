@@ -1,4 +1,10 @@
 // Auto-generated types stub — run `supabase gen types typescript` to regenerate
+type RequiredKeys<T> = { [K in keyof T]: null extends T[K] ? never : K }[keyof T]
+type OptionalKeys<T> = { [K in keyof T]: null extends T[K] ? K : never }[keyof T]
+// Mirrors what `supabase gen types` does: columns that are nullable (and thus have an
+// implicit default of NULL) become optional on insert, matching the real Postgres schema.
+type InsertShape<T> = Pick<T, RequiredKeys<T>> & Partial<Pick<T, OptionalKeys<T>>>
+
 export type Database = {
   public: {
     Tables: {
@@ -12,7 +18,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['profiles']['Row'], 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>
         Relationships: []
       }
@@ -37,7 +43,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['members']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['members']['Row'], 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['members']['Insert']>
         Relationships: [
           { foreignKeyName: 'members_graduation_id_fkey'; columns: ['graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] }
@@ -54,7 +60,7 @@ export type Database = {
           min_training_months: number | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['graduations']['Row'], 'id' | 'created_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['graduations']['Row'], 'id' | 'created_at'>>
         Update: Partial<Database['public']['Tables']['graduations']['Insert']>
         Relationships: []
       }
@@ -72,7 +78,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['exams']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['exams']['Row'], 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['exams']['Insert']>
         Relationships: [
           { foreignKeyName: 'exams_examiner_id_fkey'; columns: ['examiner_id']; isOneToOne: false; referencedRelation: 'profiles'; referencedColumns: ['id'] }
@@ -88,7 +94,7 @@ export type Database = {
           notes: string | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['exam_participants']['Row'], 'id' | 'created_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['exam_participants']['Row'], 'id' | 'created_at'>>
         Update: Partial<Database['public']['Tables']['exam_participants']['Insert']>
         Relationships: [
           { foreignKeyName: 'exam_participants_exam_id_fkey'; columns: ['exam_id']; isOneToOne: false; referencedRelation: 'exams'; referencedColumns: ['id'] },
@@ -108,7 +114,7 @@ export type Database = {
           examiner: string | null
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['exam_history']['Row'], 'id' | 'created_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['exam_history']['Row'], 'id' | 'created_at'>>
         Update: Partial<Database['public']['Tables']['exam_history']['Insert']>
         Relationships: [
           { foreignKeyName: 'exam_history_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
@@ -129,7 +135,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['checklist_templates']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['checklist_templates']['Row'], 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['checklist_templates']['Insert']>
         Relationships: [
           { foreignKeyName: 'checklist_templates_graduation_id_fkey'; columns: ['graduation_id']; isOneToOne: false; referencedRelation: 'graduations'; referencedColumns: ['id'] },
@@ -149,7 +155,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['checklist_assignments']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['checklist_assignments']['Row'], 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['checklist_assignments']['Insert']>
         Relationships: [
           { foreignKeyName: 'checklist_assignments_template_id_fkey'; columns: ['template_id']; isOneToOne: false; referencedRelation: 'checklist_templates'; referencedColumns: ['id'] }
@@ -165,7 +171,7 @@ export type Database = {
           sort_order: number
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['checklist_items']['Row'], 'id' | 'created_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['checklist_items']['Row'], 'id' | 'created_at'>>
         Update: Partial<Database['public']['Tables']['checklist_items']['Insert']>
         Relationships: [
           { foreignKeyName: 'checklist_items_template_id_fkey'; columns: ['template_id']; isOneToOne: false; referencedRelation: 'checklist_templates'; referencedColumns: ['id'] }
@@ -184,7 +190,7 @@ export type Database = {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['member_checklist_status']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['member_checklist_status']['Row'], 'id' | 'created_at' | 'updated_at'>>
         Update: Partial<Database['public']['Tables']['member_checklist_status']['Insert']>
         Relationships: [
           { foreignKeyName: 'member_checklist_status_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },
@@ -207,7 +213,7 @@ export type Database = {
           uploaded_by: string
           created_at: string
         }
-        Insert: Omit<Database['public']['Tables']['member_documents']['Row'], 'id' | 'created_at'>
+        Insert: InsertShape<Omit<Database['public']['Tables']['member_documents']['Row'], 'id' | 'created_at'>>
         Update: Partial<Database['public']['Tables']['member_documents']['Insert']>
         Relationships: [
           { foreignKeyName: 'member_documents_member_id_fkey'; columns: ['member_id']; isOneToOne: false; referencedRelation: 'members'; referencedColumns: ['id'] },

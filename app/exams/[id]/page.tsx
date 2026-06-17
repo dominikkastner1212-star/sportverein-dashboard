@@ -58,7 +58,8 @@ export default async function ExamDetailPage({ params }: { params: Promise<{ id:
 
   const role = (profile?.role || 'reader') as UserRole
   const canEdit = role === 'admin' || role === 'trainer'
-  const e = exam as Exam & { profiles: { full_name: string } | null }
+  const examRow = exam as Exam & { profiles: { full_name: string | null } | { full_name: string | null }[] | null }
+  const e = { ...examRow, profiles: firstRelation(examRow.profiles) }
   const visibleGraduations = getVisibleGraduations((graduations || []) as Graduation[])
   const allowedIds = new Set(e.allowed_graduation_ids || [])
   const allowedGraduations = visibleGraduations.filter(g => allowedIds.has(g.id))

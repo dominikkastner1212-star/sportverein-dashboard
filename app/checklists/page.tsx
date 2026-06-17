@@ -159,6 +159,23 @@ export default function ChecklistsPage() {
     await supabase.from('checklist_templates').update(patch).eq('id', templateId)
   }
 
+  async function deleteTemplate(templateId: string) {
+    if (!confirm('Diese Checkliste inkl. aller Punkte und Zuweisungen löschen?')) return
+
+    await supabase.from('checklist_templates').delete().eq('id', templateId)
+
+    setTemplates(prev => prev.filter(template => template.id !== templateId))
+    setAllAssignments(prev => prev.filter(assignment => assignment.template_id !== templateId))
+
+    if (selectedTemplateId === templateId) {
+      setItems([])
+      setSelectedTemplateId(prev => {
+        const remaining = templates.filter(template => template.id !== templateId)
+        return remaining[0]?.id || null
+      })
+    }
+  }
+
   async function addItem() {
     if (!selectedTemplateId || !newItemLabel.trim()) return
 
@@ -313,14 +330,22 @@ export default function ChecklistsPage() {
                 const targetCount = getMatchingMembersForTemplate(template, allAssignments, members).size
 
                 return (
-                  <button
+                  <div
                     key={template.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => {
                       setSelectedTemplateId(template.id)
                       setActiveTab('items')
                     }}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        setSelectedTemplateId(template.id)
+                        setActiveTab('items')
+                      }
+                    }}
                     className={cn(
-                      'min-w-[220px] rounded-xl border px-4 py-3 text-left transition-all xl:min-w-0',
+                      'min-w-[220px] cursor-pointer rounded-xl border px-4 py-3 text-left transition-all xl:min-w-0',
                       selectedTemplateId === template.id
                         ? 'border-accent bg-accent/5 shadow-card'
                         : 'border-surface-3 bg-surface-0 hover:bg-surface-1'
@@ -341,11 +366,23 @@ export default function ChecklistsPage() {
                           )}
                         </div>
                       </div>
-                      <span className="rounded-full bg-surface-1 px-2 py-1 text-xs font-medium text-ink-subtle">
-                        {targetCount}
-                      </span>
+                      <div className="flex flex-shrink-0 items-center gap-2">
+                        <span className="rounded-full bg-surface-1 px-2 py-1 text-xs font-medium text-ink-subtle">
+                          {targetCount}
+                        </span>
+                        <button
+                          onClick={event => {
+                            event.stopPropagation()
+                            deleteTemplate(template.id)
+                          }}
+                          className="rounded-lg p-1.5 text-ink-subtle transition-colors hover:bg-red-50 hover:text-red-600"
+                          title="Checkliste löschen"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>
